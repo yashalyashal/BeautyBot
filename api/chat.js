@@ -5,7 +5,20 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
 
   const { parts } = req.body;
-  const text = parts.filter(p => p.text).map(p => p.text).join('\n');
+  
+  // Transform parts format to match OpenRouter/OpenAI content structure supporting text and inline images
+  const formattedContent = parts.map(p => {
+    if (p.text) return { type: 'text', text: p.text };
+    if (p.inlineData) {
+      return {
+        type: 'image_url',
+        image_url: {
+          url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`
+        }
+      };
+    }
+    return null;
+  }).filter(Boolean);
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -16,7 +29,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'openrouter/auto',
-        messages: [{ role: 'user', content: text }],
+        messages: [{ role: 'user', content: formattedContent }],
       }),
     });
 
