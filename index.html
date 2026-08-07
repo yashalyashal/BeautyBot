@@ -389,10 +389,17 @@ You always completely drive me wild."`;
     }
 
     if (!inputVal && !currentImageB64) return;
+    
+    // Immediately clear previous error state on new generation attempt
+    document.getElementById('error-msg').style.display = 'none';
+
     if (!checkGuestLimit()) return;
+    
     showLoading();
     const btn = document.getElementById('text-btn');
     btn.disabled = true;
+    const originalBtnText = btn.textContent;
+    btn.textContent = currentTheme === 'yuan' ? 'conjuring something beautiful...' : 'conjuring something beautiful for me...';
 
     try {
       let parts = [{ text: getPrompt() }];
@@ -410,6 +417,7 @@ You always completely drive me wild."`;
       document.getElementById('error-msg').style.display = 'block';
     } finally { 
       btn.disabled = false; 
+      btn.textContent = originalBtnText;
     }
   }
 
