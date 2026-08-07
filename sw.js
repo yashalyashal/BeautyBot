@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yashgpt-v1';
+const CACHE_NAME = 'beautybot-v2';
 const ASSETS = [
   '/',
   '/index.html',
