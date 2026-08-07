@@ -6,7 +6,6 @@ export default async function handler(req, res) {
 
   const { parts } = req.body;
   
-  // Transform parts format to match OpenRouter/OpenAI content structure supporting text and inline images
   const formattedContent = parts.map(p => {
     if (p.text) return { type: 'text', text: p.text };
     if (p.inlineData) {
@@ -28,19 +27,22 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'openrouter/auto',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: [{ role: 'user', content: formattedContent }],
       }),
     });
 
     const data = await response.json();
-    console.log('OpenRouter response:', JSON.stringify(data));
-    if (!response.ok) return res.status(500).json({ error: data.error?.message || 'error' });
+    
+    if (!response.ok) {
+      console.error('OpenRouter error details:', JSON.stringify(data));
+      return res.status(500).json({ error: data.error?.message || 'OpenRouter upstream error' });
+    }
 
     const content = data.choices?.[0]?.message?.content || '';
     return res.status(200).json({ content });
   } catch (err) {
-    console.error('Error:', err);
+    console.error('Server crash error:', err);
     return res.status(500).json({ error: err.message });
   }
 }
