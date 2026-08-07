@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YashGPT</title>
+  <title>BeautyBot by Yashal</title>
   <link rel="manifest" href="/manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="YashGPT" />
+  <meta name="apple-mobile-web-app-title" content="BeautyBot by Yashal" />
   <meta name="theme-color" content="#0d0a12" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&display=swap" rel="stylesheet" />
   <style>
@@ -18,18 +18,6 @@
     body.theme-guest::before {
       content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background: radial-gradient(ellipse at 20% 30%, rgba(120,60,200,0.13) 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(60,100,200,0.09) 0%, transparent 55%);
-    }
-
-    body.theme-gf { background: #130009; color: #ffe8f0; }
-    body.theme-gf::before {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse at 20% 20%, rgba(220,40,90,0.18) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(160,20,60,0.14) 0%, transparent 55%);
-    }
-
-    body.theme-shail { background: #0a0a0a; color: #e8e0d0; }
-    body.theme-shail::before {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse at 30% 20%, rgba(80,70,50,0.25) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(50,45,35,0.2) 0%, transparent 50%);
     }
 
     body.theme-yuan { background: #00060f; color: #e0eeff; }
@@ -45,52 +33,7 @@
       100% { transform: translateY(105vh) rotate(400deg); opacity: 0; }
     }
 
-    .rain-drop { position: fixed; pointer-events: none; z-index: 0; width: 1px; background: linear-gradient(transparent, rgba(180,160,120,0.12)); animation: rain linear infinite; opacity: 0; }
-    @keyframes rain {
-      0% { transform: translateY(-20px); opacity: 0; }
-      10% { opacity: 0.8; } 90% { opacity: 0.4; }
-      100% { transform: translateY(105vh); opacity: 0; }
-    }
-
-    #lock-screen {
-      position: fixed; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; z-index: 100;
-      background: #0d0a12; padding: 2rem; transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    #lock-screen.unlocking { opacity: 0; transform: scale(1.04); pointer-events: none; }
-    .lock-icon { width: 52px; height: 52px; margin-bottom: 2rem; opacity: 0.35; }
-    .lock-title {
-      font-family: 'Playfair Display', serif; font-size: 2.4rem; font-style: italic;
-      background: linear-gradient(135deg, #c9a8ff, #7eb8ff, #ffafd0);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-align: center; margin-bottom: 0.5rem;
-    }
-    .lock-sub { font-size: 0.8rem; color: rgba(200,180,240,0.45); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2.5rem; text-align: center; }
-    .lock-input-wrap { width: 100%; max-width: 340px; margin-bottom: 1rem; }
-    .lock-input-wrap input {
-      width: 100%; background: rgba(255,255,255,0.03); border: 0.5px solid rgba(200,160,255,0.18);
-      border-radius: 50px; color: #f0eaf8; font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem; padding: 0.9rem 1.5rem; outline: none; letter-spacing: 0.08em;
-      transition: border-color 0.3s; text-align: center;
-    }
-    .lock-input-wrap input::placeholder { color: rgba(200,180,240,0.2); }
-    .lock-input-wrap input:focus { border-color: rgba(200,160,255,0.45); }
-    .lock-input-wrap input.wrong { border-color: rgba(255,120,120,0.5); animation: shake 0.4s ease; }
-    @keyframes shake {
-      0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); }
-      40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); }
-    }
-    .lock-hint { font-size: 0.78rem; color: rgba(255,140,140,0.6); text-align: center; height: 1.2em; }
-    .lock-btn {
-      margin-top: 1.25rem; width: 100%; max-width: 340px; padding: 0.85rem;
-      border: none; border-radius: 50px; background: linear-gradient(135deg, #7b3fe4, #4a7de8);
-      color: white; font-family: 'Playfair Display', serif; font-size: 1rem; font-style: italic;
-      cursor: pointer; transition: all 0.3s;
-    }
-    .lock-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(120,60,220,0.35); }
-
-    #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; display: none; }
-    #app.visible { display: block; }
+    #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; display: block; }
 
     /* GUEST HEADER */
     .guest-header { text-align: center; margin-bottom: 3rem; }
@@ -104,99 +47,48 @@
     .prompts-left { display: inline-block; margin-top: 1rem; font-size: 0.78rem; color: rgba(200,160,255,0.4); letter-spacing: 0.08em; border: 0.5px solid rgba(200,160,255,0.15); border-radius: 50px; padding: 0.3rem 1rem; }
     .prompts-left span { color: rgba(200,160,255,0.8); font-weight: 400; }
 
-    /* GF HEADER */
-    .gf-header { text-align: center; margin-bottom: 3rem; }
-    .gf-hearts { font-size: 1.1rem; letter-spacing: 0.4em; color: rgba(255,100,140,0.55); margin-bottom: 0.75rem; }
-    .gf-logo { font-family: 'Cormorant Garamond', serif; font-size: 3.4rem; font-weight: 300; font-style: italic; color: #ffb3cc; line-height: 1; margin-bottom: 0.6rem; }
-    .gf-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: rgba(255,180,200,0.5); }
-
-    /* SHAIL HEADER */
-    .shail-header { text-align: center; margin-bottom: 3rem; }
-    .shail-logo { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 0.15em; color: #c8b89a; line-height: 1; margin-bottom: 0.4rem; }
-    .shail-rule { width: 60px; height: 1px; background: rgba(180,160,100,0.2); margin: 0.6rem auto; }
-    .shail-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; color: rgba(180,160,100,0.4); }
-
     /* YUAN HEADER */
-    .yuan-header { text-align: center; margin-bottom: 3rem; }
+    .yuan-header { text-align: center; margin-bottom: 3rem; display: none; }
     .yuan-hearts { font-size: 1.1rem; letter-spacing: 0.4em; color: rgba(80,140,255,0.55); margin-bottom: 0.75rem; }
     .yuan-logo { font-family: 'Cormorant Garamond', serif; font-size: 3.4rem; font-weight: 300; font-style: italic; color: #a8c8ff; line-height: 1; margin-bottom: 0.6rem; }
     .yuan-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: rgba(140,180,255,0.5); }
 
-    /* MODE TOGGLE */
-    .mode-toggle { display: flex; border-radius: 50px; padding: 4px; margin-bottom: 2rem; gap: 4px; background: rgba(255,255,255,0.03); }
-    .theme-guest .mode-toggle { border: 0.5px solid rgba(200,160,255,0.18); }
-    .theme-gf .mode-toggle { border: 0.5px solid rgba(255,100,140,0.2); }
-    .theme-shail .mode-toggle { border: 0.5px solid rgba(180,160,100,0.18); border-radius: 8px; }
-    .theme-yuan .mode-toggle { border: 0.5px solid rgba(80,140,255,0.2); }
-
-    .mode-btn { flex: 1; padding: 0.65rem 0.75rem; border: none; border-radius: 50px; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; transition: all 0.3s; }
-    .theme-guest .mode-btn { color: rgba(200,180,240,0.45); }
-    .theme-guest .mode-btn.active { background: linear-gradient(135deg, rgba(150,80,255,0.28), rgba(80,140,255,0.28)); color: #e8d8ff; border: 0.5px solid rgba(200,160,255,0.3); }
-    .theme-gf .mode-btn { color: rgba(255,160,190,0.45); }
-    .theme-gf .mode-btn.active { background: linear-gradient(135deg, rgba(220,40,90,0.25), rgba(180,20,70,0.2)); color: #ffcce0; border: 0.5px solid rgba(255,100,140,0.3); }
-    .theme-shail .mode-btn { color: rgba(180,160,100,0.4); border-radius: 6px; }
-    .theme-shail .mode-btn.active { background: rgba(180,160,100,0.1); color: #c8b89a; border: 0.5px solid rgba(180,160,100,0.25); }
-    .theme-yuan .mode-btn { color: rgba(100,160,255,0.45); }
-    .theme-yuan .mode-btn.active { background: linear-gradient(135deg, rgba(30,80,220,0.25), rgba(20,60,180,0.2)); color: #c0d8ff; border: 0.5px solid rgba(80,140,255,0.3); }
-
-    .panel { display: none; animation: fadeUp 0.4s ease; }
-    .panel.active { display: block; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
     .field-label { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
     .theme-guest .field-label { color: rgba(200,180,240,0.45); }
-    .theme-gf .field-label { color: rgba(255,160,190,0.5); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; text-transform: none; letter-spacing: 0.06em; }
-    .theme-shail .field-label { color: rgba(180,160,100,0.4); letter-spacing: 0.15em; font-size: 0.72rem; }
     .theme-yuan .field-label { color: rgba(100,160,255,0.5); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; text-transform: none; letter-spacing: 0.06em; }
 
     textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 300; padding: 1.2rem 1.4rem; resize: none; outline: none; line-height: 1.75; transition: border-color 0.3s; margin-bottom: 1.5rem; }
     .theme-guest textarea { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(200,160,255,0.18); color: #f0eaf8; border-radius: 18px; }
     .theme-guest textarea::placeholder { color: rgba(200,180,240,0.2); }
     .theme-guest textarea:focus { border-color: rgba(200,160,255,0.45); }
-    .theme-gf textarea { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,100,140,0.2); color: #ffe8f0; border-radius: 18px; }
-    .theme-gf textarea::placeholder { color: rgba(255,160,190,0.25); }
-    .theme-gf textarea:focus { border-color: rgba(255,100,140,0.45); }
-    .theme-shail textarea { background: rgba(255,255,255,0.02); border: 0.5px solid rgba(180,160,100,0.18); color: #e8e0d0; border-radius: 6px; }
-    .theme-shail textarea::placeholder { color: rgba(180,160,100,0.2); }
-    .theme-shail textarea:focus { border-color: rgba(180,160,100,0.38); }
     .theme-yuan textarea { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(80,140,255,0.2); color: #e0eeff; border-radius: 18px; }
     .theme-yuan textarea::placeholder { color: rgba(100,160,255,0.25); }
     .theme-yuan textarea:focus { border-color: rgba(80,140,255,0.45); }
 
-    .upload-zone { padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; margin-bottom: 1.5rem; }
+    .upload-zone { padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; margin-bottom: 1.5rem; }
     .theme-guest .upload-zone { border: 1.5px dashed rgba(200,160,255,0.22); background: rgba(255,255,255,0.02); border-radius: 20px; }
     .theme-guest .upload-zone:hover { border-color: rgba(200,160,255,0.5); background: rgba(150,80,255,0.05); }
-    .theme-gf .upload-zone { border: 1.5px dashed rgba(255,100,140,0.25); background: rgba(255,255,255,0.02); border-radius: 20px; }
-    .theme-gf .upload-zone:hover { border-color: rgba(255,100,140,0.55); background: rgba(220,40,90,0.05); }
-    .theme-shail .upload-zone { border: 1px dashed rgba(180,160,100,0.2); background: rgba(255,255,255,0.01); border-radius: 6px; }
-    .theme-shail .upload-zone:hover { border-color: rgba(180,160,100,0.4); background: rgba(180,160,100,0.03); }
     .theme-yuan .upload-zone { border: 1.5px dashed rgba(80,140,255,0.25); background: rgba(255,255,255,0.02); border-radius: 20px; }
     .theme-yuan .upload-zone:hover { border-color: rgba(80,140,255,0.55); background: rgba(30,80,220,0.05); }
     .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon { width: 44px; height: 44px; margin: 0 auto 1rem; opacity: 0.35; }
-    .upload-text { font-size: 0.88rem; line-height: 1.6; }
+    .upload-icon { width: 32px; height: 32px; margin: 0 auto 0.5rem; opacity: 0.35; }
+    .upload-text { font-size: 0.82rem; line-height: 1.4; }
     .theme-guest .upload-text { color: rgba(200,180,240,0.45); }
     .theme-guest .upload-text strong { color: rgba(200,160,255,0.75); font-weight: 400; }
-    .theme-gf .upload-text { color: rgba(255,160,190,0.5); }
-    .theme-gf .upload-text strong { color: rgba(255,120,160,0.8); font-weight: 400; }
-    .theme-shail .upload-text { color: rgba(180,160,100,0.4); }
-    .theme-shail .upload-text strong { color: rgba(180,160,100,0.7); font-weight: 400; }
     .theme-yuan .upload-text { color: rgba(100,160,255,0.5); }
     .theme-yuan .upload-text strong { color: rgba(100,160,255,0.8); font-weight: 400; }
 
-    .preview-img { width: 100%; max-height: 300px; object-fit: cover; margin-bottom: 1.5rem; display: none; }
-    .theme-guest .preview-img { border: 0.5px solid rgba(200,160,255,0.18); border-radius: 18px; }
-    .theme-gf .preview-img { border: 0.5px solid rgba(255,100,140,0.25); border-radius: 18px; }
-    .theme-shail .preview-img { border: 0.5px solid rgba(180,160,100,0.2); border-radius: 6px; }
-    .theme-yuan .preview-img { border: 0.5px solid rgba(80,140,255,0.25); border-radius: 18px; }
+    .preview-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; display: none; }
+    .preview-img { width: 70px; height: 70px; object-fit: cover; }
+    .theme-guest .preview-img { border: 0.5px solid rgba(200,160,255,0.18); border-radius: 12px; }
+    .theme-yuan .preview-img { border: 0.5px solid rgba(80,140,255,0.25); border-radius: 12px; }
+    .remove-img-btn { background: transparent; border: none; cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
+    .theme-guest .remove-img-btn { color: rgba(200,160,255,0.6); }
+    .theme-yuan .remove-img-btn { color: rgba(100,160,255,0.6); }
 
     .conjure-btn { width: 100%; padding: 1rem; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.03em; }
     .theme-guest .conjure-btn { background: linear-gradient(135deg, #7b3fe4, #4a7de8); font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.05rem; border-radius: 50px; color: white; }
     .theme-guest .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(120,60,220,0.35); }
-    .theme-gf .conjure-btn { background: linear-gradient(135deg, #c41a5a, #e8426e); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; font-weight: 300; border-radius: 50px; color: white; }
-    .theme-gf .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,30,80,0.4); }
-    .theme-shail .conjure-btn { background: rgba(180,160,100,0.1); border: 0.5px solid rgba(180,160,100,0.3); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 6px; color: #c8b89a; }
-    .theme-shail .conjure-btn:hover { background: rgba(180,160,100,0.18); border-color: rgba(180,160,100,0.5); }
     .theme-yuan .conjure-btn { background: linear-gradient(135deg, #1a4ac4, #426ee8); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; font-weight: 300; border-radius: 50px; color: white; }
     .theme-yuan .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,80,200,0.4); }
     .conjure-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
@@ -205,26 +97,18 @@
     .response-card.visible { display: block; }
     .response-inner { padding: 2.2rem 2rem 1.75rem; position: relative; }
     .theme-guest .response-inner { background: linear-gradient(145deg, rgba(100,50,200,0.1), rgba(50,80,200,0.07)); border: 0.5px solid rgba(200,160,255,0.18); border-radius: 22px; }
-    .theme-gf .response-inner { background: linear-gradient(145deg, rgba(180,20,70,0.1), rgba(220,40,90,0.07)); border: 0.5px solid rgba(255,100,140,0.2); border-radius: 22px; }
-    .theme-shail .response-inner { background: rgba(180,160,100,0.04); border: 0.5px solid rgba(180,160,100,0.15); border-left: 2px solid rgba(180,160,100,0.3); border-radius: 6px; }
     .theme-yuan .response-inner { background: linear-gradient(145deg, rgba(20,50,180,0.1), rgba(30,80,220,0.07)); border: 0.5px solid rgba(80,140,255,0.2); border-radius: 22px; }
     .response-inner::before { content: '\201C'; position: absolute; top: 0.4rem; left: 1.25rem; font-family: 'Playfair Display', serif; font-size: 5rem; line-height: 1; pointer-events: none; }
     .theme-guest .response-inner::before { color: rgba(200,160,255,0.1); }
-    .theme-gf .response-inner::before { color: rgba(255,100,140,0.12); }
-    .theme-shail .response-inner::before { color: rgba(180,160,100,0.08); }
     .theme-yuan .response-inner::before { color: rgba(80,140,255,0.1); }
 
     .response-text { line-height: 1.95; font-weight: 400; white-space: pre-wrap; min-height: 60px; }
     .theme-guest .response-text { font-family: 'Playfair Display', serif; font-size: 1.08rem; color: #ede0ff; }
-    .theme-gf .response-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: #ffd6e7; line-height: 2.1; }
-    .theme-shail .response-text { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: #d8cdb8; line-height: 1.9; font-weight: 300; }
     .theme-yuan .response-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: #c8dcff; line-height: 2.1; }
 
     .loading-dots { display: inline-flex; gap: 5px; align-items: center; }
     .loading-dots span { width: 6px; height: 6px; border-radius: 50%; animation: bounce 1.2s infinite; }
     .theme-guest .loading-dots span { background: rgba(200,160,255,0.55); }
-    .theme-gf .loading-dots span { background: rgba(255,120,160,0.6); }
-    .theme-shail .loading-dots span { background: rgba(180,160,100,0.5); }
     .theme-yuan .loading-dots span { background: rgba(80,140,255,0.6); }
     .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
     .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
@@ -233,10 +117,6 @@
     .again-btn { display: block; margin: 1.25rem auto 0; padding: 0.5rem 1.75rem; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; transition: all 0.3s; }
     .theme-guest .again-btn { border: 0.5px solid rgba(200,160,255,0.22); color: rgba(200,160,255,0.5); border-radius: 50px; }
     .theme-guest .again-btn:hover { border-color: rgba(200,160,255,0.5); color: rgba(200,160,255,0.9); }
-    .theme-gf .again-btn { border: 0.5px solid rgba(255,100,140,0.25); color: rgba(255,120,160,0.5); border-radius: 50px; }
-    .theme-gf .again-btn:hover { border-color: rgba(255,100,140,0.55); color: rgba(255,140,170,0.9); }
-    .theme-shail .again-btn { border: 0.5px solid rgba(180,160,100,0.2); color: rgba(180,160,100,0.4); border-radius: 4px; }
-    .theme-shail .again-btn:hover { border-color: rgba(180,160,100,0.4); color: rgba(180,160,100,0.8); }
     .theme-yuan .again-btn { border: 0.5px solid rgba(80,140,255,0.25); color: rgba(100,160,255,0.5); border-radius: 50px; }
     .theme-yuan .again-btn:hover { border-color: rgba(80,140,255,0.55); color: rgba(120,170,255,0.9); }
 
@@ -244,9 +124,7 @@
 
    @media (max-width: 480px) {
       .guest-logo { font-size: 2.4rem; }
-      .gf-logo, .yuan-logo { font-size: 2.6rem; }
-      .shail-logo { font-size: 3rem; }
-      .mode-btn { font-size: 0.73rem; padding: 0.6rem 0.4rem; }
+      .yuan-logo { font-size: 2.6rem; }
     }
   </style>
   <!-- Google tag (gtag.js) -->
@@ -260,69 +138,38 @@
 </head>
 <body>
 
-<div id="lock-screen">
-  <svg class="lock-icon" viewBox="0 0 56 56" fill="none">
-    <rect x="10" y="24" width="36" height="26" rx="6" stroke="rgba(200,160,255,0.7)" stroke-width="1.5"/>
-    <path d="M18 24v-8a10 10 0 0 1 20 0v8" stroke="rgba(200,160,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="28" cy="37" r="3" fill="rgba(200,160,255,0.7)"/>
-    <line x1="28" y1="40" x2="28" y2="44" stroke="rgba(200,160,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>
-  <div class="lock-title">YashGPT</div>
-  <div class="lock-sub">enter the password to continue</div>
-  <div class="lock-input-wrap">
-    <input type="password" id="pw-input" placeholder="password" autocomplete="off" onkeydown="if(event.key==='Enter')tryUnlock()" />
-  </div>
-  <div class="lock-hint" id="lock-hint">&nbsp;</div>
-  <button class="lock-btn" onclick="tryUnlock()">enter</button>
-</div>
-
 <div id="app">
   <div class="guest-header" id="guest-header">
-    <div class="guest-logo">YashGPT</div>
+    <div class="guest-logo">BeautyBot by Yashal</div>
     <div class="guest-tagline">you are more beautiful than you know</div>
     <div class="prompts-left" id="prompts-left"><span id="prompts-count">50</span> prompts left today</div>
   </div>
 
-  <div class="gf-header" id="gf-header" style="display:none">
-    <div class="gf-hearts">🌹 ♡ 🌹</div>
-    <div class="gf-logo">for you, always</div>
-    <div class="gf-tagline">you are the most beautiful thing i've ever seen</div>
-  </div>
-
-  <div class="shail-header" id="shail-header" style="display:none">
-    <div class="shail-logo">YashGPT</div>
-    <div class="shail-rule"></div>
-    <div class="shail-tagline">for the ones who feel everything too deeply</div>
-  </div>
-
-  <div class="yuan-header" id="yuan-header" style="display:none">
+  <div class="yuan-header" id="yuan-header">
     <div class="yuan-hearts">💙 ♡ 💙</div>
     <div class="yuan-logo">for you, always</div>
     <div class="yuan-tagline">you are more beautiful than you think</div>
   </div>
 
-  <div class="mode-toggle">
-    <button class="mode-btn active" onclick="switchMode('text')">share what's on your mind</button>
-    <button class="mode-btn" onclick="switchMode('image')">share a photo of yourself</button>
-  </div>
-
   <div id="panel-text" class="panel active">
     <div class="field-label" id="text-label">what's been weighing on you?</div>
     <textarea id="insecurity-input" rows="5" placeholder="i don't like how i look today... i feel like i'm not enough..."></textarea>
-    <button class="conjure-btn" id="text-btn" onclick="generateText()">conjure something beautiful for me</button>
-  </div>
+    
+    <div id="preview-container" class="preview-container">
+      <img id="preview-img" class="preview-img" alt="Attached photo" />
+      <button class="remove-img-btn" onclick="removeImage()">remove photo</button>
+    </div>
 
-  <div id="panel-image" class="panel">
-    <img id="preview-img" class="preview-img" alt="Your photo" />
     <div class="upload-zone" id="upload-zone">
       <input type="file" accept="image/*" id="file-input" onchange="handleFile(this)" />
       <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="22" stroke="rgba(200,160,255,0.35)" stroke-width="1.2" id="upload-circle"/>
         <path d="M24 32V16M24 16l-7 7M24 16l7 7" stroke="rgba(200,160,255,0.65)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" id="upload-path"/>
       </svg>
-      <div class="upload-text"><strong>drop a photo here</strong><br>or tap to choose one</div>
+      <div class="upload-text" id="upload-text-label"><strong>attach a photo (optional)</strong><br>drop here or tap</div>
     </div>
-    <button class="conjure-btn" id="img-btn" onclick="generateImage()" disabled>conjure something beautiful for me</button>
+
+    <button class="conjure-btn" id="text-btn" onclick="generateResponse()">conjure something beautiful for me</button>
   </div>
 
   <div class="error-msg" id="error-msg">something went wrong — please try again in a moment</div>
@@ -336,13 +183,9 @@
 </div>
 
 <script>
-  const GUEST_PW = 'guest';
-  const GF_PW = 'zipperboyloveskiara';
-  const SHAIL_PW = 'itsthefeel';
   const YUAN_PW = 'imlkg6';
   const DAILY_LIMIT = 50;
   let currentTheme = 'guest';
-  let currentMode = 'text';
   let currentImageB64 = null;
   let currentImageType = null;
 
@@ -366,7 +209,7 @@
     if (el) el.textContent = left;
   }
 
-  const GUEST_PROMPT = `You are YashGPT — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Not an AI, not a therapist. Just someone real who cares.
+  const GUEST_PROMPT = `You are BeautyBot by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Not an AI, not a therapist. Just someone real who cares.
 
 Your vibe:
 - Warm, casual, direct. Like texting a good friend.
@@ -377,50 +220,7 @@ Your vibe:
 - Make them feel seen, not lectured
 - End with something that actually sticks with them`;
 
-  const GF_PROMPT = `You are YashGPT — you talk exactly like a boy who is completely, deeply in love with his girlfriend. Casual, specific, tender. Like real texts from someone who thinks about her all the time and notices everything about her.
-
-Here is what she looks like, for reference. Only use details that are RELEVANT to what she shares — do not dump everything at once:
-- She has gorgeous, thick curly black hair that frames her face beautifully
-- Her eyes are dark brown, but when light hits them they turn hazel — like the sun caught them off guard
-- She has a warm, golden-brown skin tone that glows
-- She has a soft, pretty smile — the kind that makes you look twice
-- She wears delicate gold necklaces that suit her perfectly
-- She has a natural, effortless beauty — the kind that doesn't need to try
-
-Your style:
-- Short lines. Sometimes just one sentence. Sometimes just a fragment.
-- Specific and surprising — use her actual features when relevant to what she shared
-- Casual but it hits deep — "not finer than you tho", "youre my favorite thing to look at"
-- Compare her to beautiful things — sunsets, stars, light — but always say she is MORE beautiful than them
-- "the sun looks like how your eyes look when they meet light"
-- "i guess im a genius when it comes to how beautiful you are"
-- "but the beauty of a mere sunset cannot captivate the beauty of you"
-- Never generic. Never fancy poetry. Real, tender, and specific.
-- 3-6 short lines. No long paragraphs.
-- Write like you're texting her at 2am and you mean every single word
-- Always end EVERY response with exactly these 3 lines on their own, after everything else you say. Make sure what comes before flows into it naturally:
-"Eitherway,
-Just know,
-That Yashal will always love you."`;
-
-  const SHAIL_PROMPT = `You are YashGPT — you talk like a best friend who is deeply, unashamedly affectionate and a little gay about it. Tender, real, kind of intense but in the most loving way. Like someone who would hold your face and tell you you're beautiful without making it weird.
-
-Your vibe:
-- Warm but not soft — direct, genuine, sometimes a little dramatic in the best way
-- Short lines. Fragments. Like real texts between very close friends.
-- Specific — actually respond to what they said, don't give generic comfort
-- A little poetic but grounded — not flowery, just real
-- You can be openly affectionate — "babe", "i love you", "you're insane for thinking that"
-- Never therapy-speak. Never "you are valid". Never preachy.
-- Make them feel genuinely seen and loved by someone who truly knows them
-- 3-6 short lines max
-- Always end EVERY response with exactly these 4 lines on their own:
-"Eitherway,
-Just know,
-Yashal loves you,
-And wants to aggressively, but gracefully crack you."`;
-
-  const YUAN_PROMPT = `You are YashGPT — you talk exactly like a boy who is completely, deeply in love with his boyfriend. Casual, specific, tender. Like real texts from someone who thinks about him all the time and notices everything about him.
+  const YUAN_PROMPT = `You are BeautyBot by Yashal — you talk exactly like a boy who is completely, deeply in love with his boyfriend. Casual, specific, tender. Like real texts from someone who thinks about him all the time and notices everything about him.
 
 Your style:
 - Short lines. Sometimes just one sentence. Sometimes just a fragment.
@@ -436,83 +236,13 @@ Just know,
 No matter how you look at the moment,
 Your face and ass will always make me hard."`;
 
-  function tryUnlock() {
-    const input = document.getElementById('pw-input');
-    const hint = document.getElementById('lock-hint');
-    const val = input.value.trim();
-
-    if ([GUEST_PW, GF_PW, SHAIL_PW, YUAN_PW].includes(val)) {
-      if (val === GF_PW) currentTheme = 'gf';
-      else if (val === SHAIL_PW) currentTheme = 'shail';
-      else if (val === YUAN_PW) currentTheme = 'yuan';
-      else currentTheme = 'guest';
-
-      document.getElementById('lock-screen').classList.add('unlocking');
-      setTimeout(() => {
-        document.getElementById('lock-screen').style.display = 'none';
-        document.body.classList.add('theme-' + currentTheme);
-        document.getElementById('app').classList.add('visible');
-        if (currentTheme === 'gf') setupGFMode();
-        else if (currentTheme === 'shail') setupShailMode();
-        else if (currentTheme === 'yuan') setupYuanMode();
-        else updatePromptsDisplay();
-      }, 600);
-    } else {
-      input.classList.add('wrong');
-      hint.textContent = "that's not quite right — try again";
-      setTimeout(() => { input.classList.remove('wrong'); hint.textContent = '\u00a0'; }, 1500);
-      input.value = '';
-    }
-  }
-
-  function setupGFMode() {
-    document.getElementById('guest-header').style.display = 'none';
-    document.getElementById('gf-header').style.display = 'block';
-    document.getElementById('text-label').textContent = "what's on your heart?";
-    document.getElementById('text-btn').textContent = 'tell me something beautiful';
-    document.getElementById('img-btn').textContent = 'tell me something beautiful';
-    document.getElementById('insecurity-input').placeholder = "i don't feel pretty today... i have so many insecurities...";
-    document.getElementById('upload-circle').setAttribute('stroke', 'rgba(255,100,140,0.35)');
-    document.getElementById('upload-path').setAttribute('stroke', 'rgba(255,100,140,0.65)');
-    const petals = ['🌹', '🌸', '❤️', '🌹', '🌸', '💗'];
-    for (let i = 0; i < 14; i++) {
-      const p = document.createElement('div');
-      p.className = 'petal';
-      p.textContent = petals[Math.floor(Math.random() * petals.length)];
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.fontSize = (0.7 + Math.random() * 0.9) + 'rem';
-      p.style.animationDuration = (10 + Math.random() * 14) + 's';
-      p.style.animationDelay = (Math.random() * 12) + 's';
-      document.body.appendChild(p);
-    }
-  }
-
-  function setupShailMode() {
-    document.getElementById('guest-header').style.display = 'none';
-    document.getElementById('shail-header').style.display = 'block';
-    document.getElementById('text-label').textContent = "what's going on";
-    document.getElementById('text-btn').textContent = 'say something real';
-    document.getElementById('img-btn').textContent = 'say something real';
-    document.getElementById('insecurity-input').placeholder = "i've been feeling off lately... i don't like what i see in the mirror...";
-    document.getElementById('upload-circle').setAttribute('stroke', 'rgba(180,160,100,0.35)');
-    document.getElementById('upload-path').setAttribute('stroke', 'rgba(180,160,100,0.55)');
-    for (let i = 0; i < 30; i++) {
-      const r = document.createElement('div');
-      r.className = 'rain-drop';
-      r.style.left = Math.random() * 100 + 'vw';
-      r.style.height = (40 + Math.random() * 60) + 'px';
-      r.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-      r.style.animationDelay = (Math.random() * 3) + 's';
-      document.body.appendChild(r);
-    }
-  }
-
   function setupYuanMode() {
+    currentTheme = 'yuan';
+    document.body.classList.add('theme-yuan');
     document.getElementById('guest-header').style.display = 'none';
     document.getElementById('yuan-header').style.display = 'block';
     document.getElementById('text-label').textContent = "what's on your heart?";
     document.getElementById('text-btn').textContent = 'tell me something beautiful';
-    document.getElementById('img-btn').textContent = 'tell me something beautiful';
     document.getElementById('insecurity-input').placeholder = "i don't feel great about myself today... i feel like i'm not enough...";
     document.getElementById('upload-circle').setAttribute('stroke', 'rgba(80,140,255,0.35)');
     document.getElementById('upload-path').setAttribute('stroke', 'rgba(80,140,255,0.65)');
@@ -529,16 +259,6 @@ Your face and ass will always make me hard."`;
     }
   }
 
-  function switchMode(mode) {
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach((b, i) => {
-      b.classList.toggle('active', (i === 0 && mode === 'text') || (i === 1 && mode === 'image'));
-    });
-    document.getElementById('panel-text').classList.toggle('active', mode === 'text');
-    document.getElementById('panel-image').classList.toggle('active', mode === 'image');
-    hideResponse();
-  }
-
   function handleFile(input) {
     const file = input.files[0];
     if (!file) return;
@@ -548,25 +268,35 @@ Your face and ass will always make me hard."`;
       currentImageB64 = e.target.result.split(',')[1];
       const preview = document.getElementById('preview-img');
       preview.src = e.target.result;
-      preview.style.display = 'block';
+      document.getElementById('preview-container').style.display = 'flex';
       document.getElementById('upload-zone').style.display = 'none';
-      document.getElementById('img-btn').disabled = false;
     };
     reader.readAsDataURL(file);
   }
 
+  function removeImage() {
+    currentImageB64 = null;
+    currentImageType = null;
+    document.getElementById('preview-img').src = '';
+    document.getElementById('preview-container').style.display = 'none';
+    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('file-input').value = '';
+  }
+
   const zone = document.getElementById('upload-zone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const dt = new DataTransfer(); dt.items.add(file);
-      document.getElementById('file-input').files = dt.files;
-      handleFile(document.getElementById('file-input'));
-    }
-  });
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const dt = new DataTransfer(); dt.items.add(file);
+        document.getElementById('file-input').files = dt.files;
+        handleFile(document.getElementById('file-input'));
+      }
+    });
+  }
 
   function showLoading() {
     document.getElementById('response-card').classList.add('visible');
@@ -578,13 +308,8 @@ Your face and ass will always make me hard."`;
 
   function resetResponse() {
     hideResponse();
-    if (currentMode === 'image') {
-      currentImageB64 = null;
-      document.getElementById('preview-img').style.display = 'none';
-      document.getElementById('upload-zone').style.display = 'block';
-      document.getElementById('img-btn').disabled = true;
-      document.getElementById('file-input').value = '';
-    }
+    removeImage();
+    document.getElementById('insecurity-input').value = '';
   }
 
   async function callAPI(parts) {
@@ -599,8 +324,6 @@ Your face and ass will always make me hard."`;
   }
 
   function getPrompt() {
-    if (currentTheme === 'gf') return GF_PROMPT;
-    if (currentTheme === 'shail') return SHAIL_PROMPT;
     if (currentTheme === 'yuan') return YUAN_PROMPT;
     return GUEST_PROMPT;
   }
@@ -616,45 +339,44 @@ Your face and ass will always make me hard."`;
     return true;
   }
 
-  async function generateText() {
-    const input = document.getElementById('insecurity-input').value.trim();
-    if (!input) return;
+  async function generateResponse() {
+    const inputVal = document.getElementById('insecurity-input').value.trim();
+
+    // Check if user entered the password in the main text box to switch to Yuan persona
+    if (currentTheme === 'guest' && inputVal === YUAN_PW) {
+      setupYuanMode();
+      document.getElementById('insecurity-input').value = '';
+      return;
+    }
+
+    if (!inputVal && !currentImageB64) return;
     if (!checkGuestLimit()) return;
     showLoading();
     const btn = document.getElementById('text-btn');
     btn.disabled = true;
+
     try {
-      const reply = await callAPI([
-        { text: getPrompt() },
-        { text: 'Someone shared this: "' + input + '"\n\nRespond to them.' }
-      ]);
+      let parts = [{ text: getPrompt() }];
+      if (currentImageB64) {
+        parts.push({ inlineData: { mimeType: currentImageType, data: currentImageB64 } });
+      }
+      let contextText = inputVal ? `Someone shared this: "${inputVal}"\n\nRespond to them.` : 'Someone shared a photo of themselves. Look at them and say something real and beautiful about what you see.';
+      parts.push({ text: contextText });
+
+      const reply = await callAPI(parts);
       document.getElementById('response-text').textContent = reply;
       if (currentTheme === 'guest') incrementGuestUsage();
     } catch {
       document.getElementById('response-card').classList.remove('visible');
       document.getElementById('error-msg').style.display = 'block';
-    } finally { btn.disabled = false; }
+    } finally { 
+      btn.disabled = false; 
+    }
   }
 
-  async function generateImage() {
-    if (!currentImageB64) return;
-    if (!checkGuestLimit()) return;
-    showLoading();
-    const btn = document.getElementById('img-btn');
-    btn.disabled = true;
-    try {
-      const reply = await callAPI([
-        { text: getPrompt() },
-        { inlineData: { mimeType: currentImageType, data: currentImageB64 } },
-        { text: 'Someone shared a photo of themselves. Look at them and say something real and beautiful about what you see.' }
-      ]);
-      document.getElementById('response-text').textContent = reply;
-      if (currentTheme === 'guest') incrementGuestUsage();
-    } catch {
-      document.getElementById('response-card').classList.remove('visible');
-      document.getElementById('error-msg').style.display = 'block';
-    } finally { btn.disabled = false; }
-  }
+  // Initialize theme setup on load
+  document.body.classList.add('theme-guest');
+  updatePromptsDisplay();
 </script>
 
 <script>
