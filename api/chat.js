@@ -13,7 +13,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Format parts into OpenRouter/OpenAI message content array
     const formattedContent = parts.map(p => {
       if (p.text) return { type: 'text', text: p.text };
       if (p.inlineData) {
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
         'X-Title': 'BeautyBot'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
+        model: 'openrouter/free',
         messages: [{ role: 'user', content: formattedContent }],
       }),
     });
