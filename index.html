@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="BeautyBot by Yashal" />
   <meta name="theme-color" content="#0d0a12" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
@@ -34,27 +35,31 @@
       100% { transform: translateY(105vh) rotate(400deg); opacity: 0; }
     }
 
-    #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; display: block; }
+    #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; display: block; }
 
-    /* GUEST HEADER */
-    .guest-header { text-align: center; margin-bottom: 3rem; }
+    /* AUTH BAR */
+    .auth-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.8rem; }
+    .auth-status { color: rgba(200,180,240,0.6); }
+    .auth-btn { background: transparent; border: 1px solid rgba(200,160,255,0.3); color: rgba(200,180,240,0.9); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+    .auth-btn:hover { background: rgba(200,160,255,0.15); border-color: rgba(200,160,255,0.6); }
+
+    /* AFFIRMATION BAR */
+    .affirmation-bar { margin-bottom: 2rem; text-align: center; }
+    .affirm-btn { background: rgba(140,80,240,0.15); border: 1px solid rgba(180,130,255,0.35); color: #e3d2ff; padding: 0.65rem 1.4rem; border-radius: 30px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; }
+    .affirm-btn:hover { background: rgba(140,80,240,0.3); box-shadow: 0 0 20px rgba(160,100,255,0.35); transform: translateY(-1px); }
+
+    /* HEADERS */
+    .guest-header { text-align: center; margin-bottom: 2.5rem; }
     .guest-logo {
       font-family: 'Playfair Display', serif; font-size: 3.2rem; font-weight: 400;
       background: linear-gradient(135deg, #c9a8ff, #7eb8ff, #ffafd0);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.3rem;
     }
-    .guest-sub-author {
-      font-size: 0.82rem;
-      color: rgba(200,160,255,0.55);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
+    .guest-sub-author { font-size: 0.82rem; color: rgba(200,160,255,0.55); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; }
     .guest-tagline { font-size: 0.85rem; color: rgba(200,180,240,0.45); letter-spacing: 0.12em; text-transform: uppercase; }
 
-    /* YUAN HEADER */
-    .yuan-header { text-align: center; margin-bottom: 3rem; display: none; }
+    .yuan-header { text-align: center; margin-bottom: 2.5rem; display: none; }
     .yuan-hearts { font-size: 1.1rem; letter-spacing: 0.4em; color: rgba(80,140,255,0.55); margin-bottom: 0.75rem; }
     .yuan-logo { font-family: 'Cormorant Garamond', serif; font-size: 3.4rem; font-weight: 300; font-style: italic; color: #a8c8ff; line-height: 1; margin-bottom: 0.6rem; }
     .yuan-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: rgba(140,180,255,0.5); }
@@ -99,7 +104,7 @@
     .theme-yuan .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,80,200,0.4); }
     .conjure-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-    .response-card { margin-top: 2rem; display: none; animation: fadeUp 0.6s ease; }
+    .response-card { margin-top: 2rem; display: none; }
     .response-card.visible { display: block; }
     .response-inner { padding: 2.2rem 2rem 1.75rem; position: relative; }
     .theme-guest .response-inner { background: linear-gradient(145deg, rgba(100,50,200,0.1), rgba(50,80,200,0.07)); border: 0.5px solid rgba(200,160,255,0.18); border-radius: 22px; }
@@ -128,15 +133,27 @@
 
     .error-msg { font-size: 0.83rem; color: rgba(255,150,150,0.75); text-align: center; margin-top: 0.75rem; display: none; }
 
-    @media (max-width: 480px) {
-      .guest-logo { font-size: 2.4rem; }
-      .yuan-logo { font-size: 2.6rem; }
-    }
+    /* AUTH MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+    .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; color: #e3d2ff; }
+    .modal-input { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,160,255,0.2); border-radius: 12px; color: #fff; outline: none; }
+    .modal-submit { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; }
+    .modal-close { margin-top: 1rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; }
   </style>
 </head>
 <body class="theme-guest">
 
 <div id="app">
+  <div class="auth-bar">
+    <div class="auth-status" id="user-status">Guest Mode (Sign in for AI Memory)</div>
+    <button class="auth-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+  </div>
+
+  <div class="affirmation-bar">
+    <button class="affirm-btn" onclick="generateAffirmations()">✨ 3 Daily Affirmations for Me</button>
+  </div>
+
   <div class="guest-header" id="guest-header">
     <div class="guest-logo">BeautyBot</div>
     <div class="guest-sub-author">by Yashal</div>
@@ -180,11 +197,66 @@
   </div>
 </div>
 
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box">
+    <div class="modal-title">Welcome to BeautyBot</div>
+    <input type="email" id="auth-email" class="modal-input" placeholder="Email address" />
+    <input type="password" id="auth-password" class="modal-input" placeholder="Password" />
+    <button class="modal-submit" onclick="handleAuth()">Continue</button>
+    <button class="modal-close" onclick="closeAuthModal()">Cancel</button>
+  </div>
+</div>
+
 <script>
   const YUAN_PW = 'imlkg6';
   let currentTheme = 'guest';
   let currentImageB64 = null;
   let currentImageType = null;
+
+  const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8"; // Paste your actual anon public key here
+  let supabase = null;
+  let currentUser = null;
+
+  if (window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabase.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
+      updateAuthUI();
+    });
+  }
+
+  function updateAuthUI() {
+    const status = document.getElementById('user-status');
+    const btn = document.getElementById('auth-toggle-btn');
+    if (currentUser) {
+      status.textContent = `Logged in: ${currentUser.email}`;
+      btn.textContent = 'Sign Out';
+      btn.onclick = () => supabase.auth.signOut();
+    } else {
+      status.textContent = 'Guest Mode (Sign in for AI Memory)';
+      btn.textContent = 'Sign In';
+      btn.onclick = openAuthModal;
+    }
+  }
+
+  function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
+  function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
+
+  async function handleAuth() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) return alert('Please enter email and password');
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+      if (signUpErr) alert(signUpErr.message);
+      else alert('Check your email to confirm your account!');
+    }
+    closeAuthModal();
+  }
 
   const GUEST_PROMPT = `You are BeautyBot by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Not an AI, not a therapist. Just someone real who cares.
 
@@ -293,21 +365,6 @@ You always completely drive me wild."`;
     document.getElementById('file-input').value = '';
   }
 
-  const zone = document.getElementById('upload-zone');
-  if (zone) {
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-    zone.addEventListener('drop', e => {
-      e.preventDefault(); zone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) {
-        const dt = new DataTransfer(); dt.items.add(file);
-        document.getElementById('file-input').files = dt.files;
-        handleFile(document.getElementById('file-input'));
-      }
-    });
-  }
-
   function showLoading() {
     document.getElementById('response-card').classList.add('visible');
     document.getElementById('response-text').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
@@ -322,20 +379,28 @@ You always completely drive me wild."`;
     document.getElementById('insecurity-input').value = '';
   }
 
-  async function callAPI(parts) {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ parts })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'error');
-    return data.content;
+  function getPrompt() {
+    return currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT;
   }
 
-  function getPrompt() {
-    if (currentTheme === 'yuan') return YUAN_PROMPT;
-    return GUEST_PROMPT;
+  async function generateAffirmations() {
+    showLoading();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parts: [{ text: getPrompt() }],
+          userId: currentUser?.id,
+          type: 'affirmations'
+        })
+      });
+      const data = await res.json();
+      document.getElementById('response-text').textContent = data.content;
+    } catch {
+      document.getElementById('response-card').classList.remove('visible');
+      document.getElementById('error-msg').style.display = 'block';
+    }
   }
 
   async function generateResponse() {
@@ -350,12 +415,7 @@ You always completely drive me wild."`;
     if (!inputVal && !currentImageB64) return;
     
     document.getElementById('error-msg').style.display = 'none';
-    
     showLoading();
-    const btn = document.getElementById('text-btn');
-    btn.disabled = true;
-    const originalBtnText = btn.textContent;
-    btn.textContent = currentTheme === 'yuan' ? 'conjuring something beautiful...' : 'conjuring something beautiful for me...';
 
     try {
       let parts = [{ text: getPrompt() }];
@@ -365,24 +425,20 @@ You always completely drive me wild."`;
       let contextText = inputVal ? `Someone shared this: "${inputVal}"\n\nRespond to them.` : 'Someone shared a photo of themselves. Look at them and say something real and beautiful about what you see.';
       parts.push({ text: contextText });
 
-      const reply = await callAPI(parts);
-      document.getElementById('response-text').textContent = reply;
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parts, userId: currentUser?.id })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+      document.getElementById('response-text').textContent = data.content;
     } catch {
       document.getElementById('response-card').classList.remove('visible');
       document.getElementById('error-msg').style.display = 'block';
-    } finally { 
-      btn.disabled = false; 
-      btn.textContent = originalBtnText;
     }
   }
-
-  document.getElementById('insecurity-input').addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      generateResponse();
-    }
-  });
 </script>
-
 </body>
 </html>
