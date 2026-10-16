@@ -1,4 +1,4 @@
-const CACHE_NAME = 'beautybot-v2';
+const CACHE_NAME = 'beautybot-v3';
 const ASSETS = [
   '/',
   '/index.html',
