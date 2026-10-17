@@ -218,7 +218,7 @@
   let currentImageB64 = null;
   let currentImageType = null;
 
- const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
+  const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
   let supabaseClient = null;
   let currentUser = null;
@@ -237,7 +237,7 @@
     if (currentUser) {
       status.textContent = `Logged in: ${currentUser.email}`;
       btn.textContent = 'Sign Out';
-      btn.onclick = () => supabase.auth.signOut();
+      btn.onclick = () => supabaseClient.auth.signOut();
     } else {
       status.textContent = 'Guest Mode (Sign in for AI Memory)';
       btn.textContent = 'Sign In';
@@ -253,9 +253,9 @@
     const password = document.getElementById('auth-password').value;
     if (!email || !password) return alert('Please enter email and password');
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
-      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
       if (signUpErr) alert(signUpErr.message);
       else alert('Check your email to confirm your account!');
     }
