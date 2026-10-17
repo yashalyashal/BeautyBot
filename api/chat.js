@@ -32,22 +32,52 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Extract plain text content from parts
-    let userPromptText = "";
-    if (Array.isArray(parts)) {
-      userPromptText = parts.map(p => (typeof p === 'string' ? p : p.text || '')).join('\n');
-    } else if (typeof parts === 'string') {
-      userPromptText = parts;
-    }
+    // 2. Parse parts safely for OpenRouter (supporting text and image parts)
+    let userContentPayload = [];
+    let textSummaryForMemory = "";
 
-    // Add memory context if available
-    if (memoryContext) {
-      userPromptText += memoryContext;
+    if (Array.isArray(parts)) {
+      for (const p of parts) {
+        if (typeof p === 'string') {
+          userContentPayload.push({ type: 'text', text: p });
+          textSummaryForMemory += p + " ";
+        } else if (p && typeof p === 'object') {
+          if (p.text) {
+            let t = p.text;
+            if (memoryContext && t.includes('Someone shared this')) {
+              t += memoryContext;
+            }
+            userContentPayload.push({ type: 'text', text: t });
+            textSummaryForMemory += t + " ";
+          } else if (p.inlineData) {
+            // Convert Gemini inlineData to OpenRouter image_url format
+            const mime = p.inlineData.mimeType || 'image/jpeg';
+            const base64 = p.inlineData.data;
+            userContentPayload.push({
+              type: 'image_url',
+              image_url: {
+                url: `data:${mime};base64,${base64}`
+              }
+            });
+            textSummaryForMemory += "[Attached Photo] ";
+          }
+        }
+      }
+    } else if (typeof parts === 'string') {
+      let finalTxt = parts;
+      if (memoryContext) finalTxt += memoryContext;
+      userContentPayload = finalTxt;
+      textSummaryForMemory = finalTxt;
     }
 
     // Handle Affirmations mode
     if (type === 'affirmations') {
-      userPromptText += "\n\nBased on what you know about me and my past insecurities, give me exactly 3 short, deeply personal affirmations to repeat to myself right now. Number them 1, 2, and 3. Make them feel like a close friend talking.";
+      const affirmationPrompt = "\n\nBased on what you know about me and my past insecurities, give me exactly 3 short, deeply personal affirmations to repeat to myself right now. Number them 1, 2, and 3. Make them feel like a close friend talking.";
+      if (Array.isArray(userContentPayload)) {
+        userContentPayload.push({ type: 'text', text: affirmationPrompt });
+      } else {
+        userContentPayload += affirmationPrompt;
+      }
     }
 
     // 3. Verify OpenRouter API Key
@@ -56,7 +86,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server configuration error: missing OPENROUTER_API_KEY' });
     }
 
-    // 4. Call OpenRouter API with correct payload string format
+    // 4. Call OpenRouter API
     const openRouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -69,7 +99,7 @@ export default async function handler(req, res) {
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are BeautyBot by Yashal, a deeply empathetic, uplifting, and warm personal assistant.' },
-          { role: 'user', content: userPromptText }
+          { role: 'user', content: userContentPayload }
         ]
       })
     });
@@ -83,9 +113,9 @@ export default async function handler(req, res) {
     const reply = data.choices?.[0]?.message?.content || "You are wonderful just as you are.";
 
     // 5. Store new input to user memory (Background save)
-    if (supabase && userId && type !== 'affirmations' && userPromptText) {
-      const cleanText = userPromptText.replace(/\[USER MEMORY:[\s\S]*?\]/g, '').replace(/Someone shared this: "|"\n\nRespond to them./g, '').trim();
-      if (cleanText.length > 5) {
+    if (supabase && userId && type !== 'affirmations' && textSummaryForMemory) {
+      const cleanText = textSummaryForMemory.replace(/\[USER MEMORY:[\s\S]*?\]/g, '').replace(/Someone shared this: "|"\n\nRespond to them./g, '').trim();
+      if (cleanText.length > 3) {
         supabase.from('memories').insert({
           user_id: userId,
           content: cleanText
