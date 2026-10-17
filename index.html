@@ -37,9 +37,10 @@
 
     #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; display: block; }
 
-    /* AUTH BAR */
+    /* AUTH & INSTALL BAR */
     .auth-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.8rem; }
     .auth-status { color: rgba(200,180,240,0.6); }
+    .auth-actions { display: flex; align-items: center; gap: 0.5rem; }
     .auth-btn { background: transparent; border: 1px solid rgba(200,160,255,0.3); color: rgba(200,180,240,0.9); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
     .auth-btn:hover { background: rgba(200,160,255,0.15); border-color: rgba(200,160,255,0.6); }
 
@@ -147,7 +148,10 @@
 <div id="app">
   <div class="auth-bar">
     <div class="auth-status" id="user-status">Guest Mode (Sign in for AI Memory)</div>
-    <button class="auth-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+    <div class="auth-actions">
+      <button class="auth-btn" id="install-app-btn" onclick="installApp()" style="display: none;">📲 Install App</button>
+      <button class="auth-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+    </div>
   </div>
 
   <div class="affirmation-bar">
@@ -215,7 +219,7 @@
   let currentImageType = null;
 
   const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8"; // Paste your actual anon public key here
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
   let supabase = null;
   let currentUser = null;
 
@@ -438,6 +442,36 @@ You always completely drive me wild."`;
       document.getElementById('response-card').classList.remove('visible');
       document.getElementById('error-msg').style.display = 'block';
     }
+  }
+
+  // REGISTER SERVICE WORKER (Phase 3 PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        console.log('SW registered!', reg);
+      }).catch((err) => {
+        console.log('SW registration failed:', err);
+      });
+    });
+  }
+
+  // HANDLE MOBILE INSTALL PROMPT
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('install-app-btn');
+    if (installBtn) installBtn.style.display = 'inline-block';
+  });
+
+  async function installApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('install-app-btn').style.display = 'none';
+    }
+    deferredPrompt = null;
   }
 </script>
 </body>
