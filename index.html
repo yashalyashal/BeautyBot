@@ -218,14 +218,14 @@
   let currentImageB64 = null;
   let currentImageType = null;
 
-  const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
+ const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
-  let supabase = null;
+  let supabaseClient = null;
   let currentUser = null;
 
   if (window.supabase) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient.auth.onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       updateAuthUI();
     });
