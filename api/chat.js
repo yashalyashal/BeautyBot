@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -28,11 +28,11 @@ export default async function handler(req, res) {
           memoryContext = `\n\n[USER MEMORY: The user has previously struggled with or mentioned: ${pastInsecurities}. Keep this in mind to make your response feel deeply personal and continuous without explicitly listing their past struggles.]`;
         }
       } catch (dbErr) {
-        console.warn("Supabase fetch error (continuing without memory):", dbErr);
+        console.warn("Supabase fetch error:", dbErr);
       }
     }
 
-    // 2. Parse parts safely for OpenRouter (supporting text and image parts)
+    // 2. Parse parts safely for OpenRouter
     let userContentPayload = [];
     let textSummaryForMemory = "";
 
@@ -50,7 +50,6 @@ export default async function handler(req, res) {
             userContentPayload.push({ type: 'text', text: t });
             textSummaryForMemory += t + " ";
           } else if (p.inlineData) {
-            // Convert Gemini inlineData to OpenRouter image_url format
             const mime = p.inlineData.mimeType || 'image/jpeg';
             const base64 = p.inlineData.data;
             userContentPayload.push({
@@ -70,7 +69,6 @@ export default async function handler(req, res) {
       textSummaryForMemory = finalTxt;
     }
 
-    // Handle Affirmations mode
     if (type === 'affirmations') {
       const affirmationPrompt = "\n\nBased on what you know about me and my past insecurities, give me exactly 3 short, deeply personal affirmations to repeat to myself right now. Number them 1, 2, and 3. Make them feel like a close friend talking.";
       if (Array.isArray(userContentPayload)) {
@@ -80,13 +78,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Verify OpenRouter API Key
     const openRouterKey = process.env.OPENROUTER_API_KEY;
     if (!openRouterKey) {
       return res.status(500).json({ error: 'Server configuration error: missing OPENROUTER_API_KEY' });
     }
 
-    // 4. Call OpenRouter API
     const openRouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -96,7 +92,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.0-flash-001',
         messages: [
           { role: 'system', content: 'You are BeautyBot by Yashal, a deeply empathetic, uplifting, and warm personal assistant.' },
           { role: 'user', content: userContentPayload }
@@ -112,7 +108,6 @@ export default async function handler(req, res) {
 
     const reply = data.choices?.[0]?.message?.content || "You are wonderful just as you are.";
 
-    // 5. Store new input to user memory (Background save)
     if (supabase && userId && type !== 'affirmations' && textSummaryForMemory) {
       const cleanText = textSummaryForMemory.replace(/\[USER MEMORY:[\s\S]*?\]/g, '').replace(/Someone shared this: "|"\n\nRespond to them./g, '').trim();
       if (cleanText.length > 3) {
@@ -130,4 +125,4 @@ export default async function handler(req, res) {
     console.error('Chat API error:', err);
     return res.status(500).json({ error: err.message || 'Failed to generate response' });
   }
-}
+};
