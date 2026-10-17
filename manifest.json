@@ -1,21 +1,20 @@
 {
   "name": "BeautyBot by Yashal",
   "short_name": "BeautyBot",
-  "description": "you are more beautiful than you know",
+  "description": "You are more beautiful than you know.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d0a12",
   "theme_color": "#0d0a12",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
