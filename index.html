@@ -127,4 +127,353 @@
     @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
 
     .again-btn { display: block; margin: 1.25rem auto 0; padding: 0.5rem 1.75rem; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; transition: all 0.3s; }
-    .theme-guest .again-btn { border: 0.5px solid rgba(200,160,255,0.22); color: rgba(200,160,255,0.5); border-radius: 50px;
+    .theme-guest .again-btn { border: 0.5px solid rgba(200,160,255,0.22); color: rgba(200,160,255,0.5); border-radius: 50px; }
+    .theme-guest .again-btn:hover { border-color: rgba(200,160,255,0.5); color: rgba(200,160,255,0.9); }
+    .theme-yuan .again-btn { border: 0.5px solid rgba(80,140,255,0.25); color: rgba(100,160,255,0.5); border-radius: 50px; }
+    .theme-yuan .again-btn:hover { border-color: rgba(80,140,255,0.55); color: rgba(120,170,255,0.9); }
+
+    .error-msg { font-size: 0.83rem; color: rgba(255,150,150,0.75); text-align: center; margin-top: 0.75rem; display: none; }
+
+    /* AUTH MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+    .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; color: #e3d2ff; }
+    .modal-input { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,160,255,0.2); border-radius: 12px; color: #fff; outline: none; }
+    .modal-submit { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; }
+    .modal-close { margin-top: 1rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; }
+  </style>
+</head>
+<body class="theme-guest">
+
+<div id="app">
+  <div class="auth-bar">
+    <div class="auth-status" id="user-status">Guest Mode (Sign in for AI Memory)</div>
+    <div class="auth-actions">
+      <button class="auth-btn" id="install-app-btn" onclick="installApp()" style="display: none;">📲 Install App</button>
+      <button class="auth-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+    </div>
+  </div>
+
+  <div class="affirmation-bar">
+    <button class="affirm-btn" onclick="generateAffirmations()">✨ 3 Daily Affirmations for Me</button>
+  </div>
+
+  <div class="guest-header" id="guest-header">
+    <div class="guest-logo">BeautyBot</div>
+    <div class="guest-sub-author">by Yashal</div>
+    <div class="guest-tagline">you are more beautiful than you know</div>
+  </div>
+
+  <div class="yuan-header" id="yuan-header">
+    <div class="yuan-hearts">💙 ♡ 💙</div>
+    <div class="yuan-logo">for you, always</div>
+    <div class="yuan-tagline">you are more beautiful than you think</div>
+  </div>
+
+  <div id="panel-text" class="panel active">
+    <div class="field-label" id="text-label">what's been weighing on you?</div>
+    <textarea id="insecurity-input" rows="5" placeholder="i don't like how i look today... i feel like i'm not enough..."></textarea>
+    
+    <div id="preview-container" class="preview-container">
+      <img id="preview-img" class="preview-img" alt="Attached photo" />
+      <button class="remove-img-btn" onclick="removeImage()">remove photo</button>
+    </div>
+
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" accept="image/*" id="file-input" onchange="handleFile(this)" />
+      <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="22" stroke="rgba(200,160,255,0.35)" stroke-width="1.2" id="upload-circle"/>
+        <path d="M24 32V16M24 16l-7 7M24 16l7 7" stroke="rgba(200,160,255,0.65)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" id="upload-path"/>
+      </svg>
+      <div class="upload-text" id="upload-text-label"><strong>attach a photo (optional)</strong><br>drop here or tap</div>
+    </div>
+
+    <button class="conjure-btn" id="text-btn" onclick="generateResponse()">conjure something beautiful for me</button>
+  </div>
+
+  <div class="error-msg" id="error-msg">something went wrong — please try again in a moment</div>
+
+  <div class="response-card" id="response-card">
+    <div class="response-inner">
+      <div class="response-text" id="response-text"></div>
+    </div>
+    <button class="again-btn" onclick="resetResponse()">ask again</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box">
+    <div class="modal-title">Welcome to BeautyBot</div>
+    <input type="email" id="auth-email" class="modal-input" placeholder="Email address" />
+    <input type="password" id="auth-password" class="modal-input" placeholder="Password" />
+    <button class="modal-submit" onclick="handleAuth()">Continue</button>
+    <button class="modal-close" onclick="closeAuthModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  const YUAN_PW = 'imlkg6';
+  let currentTheme = 'guest';
+  let currentImageB64 = null;
+  let currentImageType = null;
+
+  const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
+  let supabaseClient = null;
+  let currentUser = null;
+
+  if (window.supabase) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
+      updateAuthUI();
+    });
+  }
+
+  function updateAuthUI() {
+    const status = document.getElementById('user-status');
+    const btn = document.getElementById('auth-toggle-btn');
+    if (currentUser) {
+      status.textContent = `Logged in: ${currentUser.email}`;
+      btn.textContent = 'Sign Out';
+      btn.onclick = () => supabaseClient.auth.signOut();
+    } else {
+      status.textContent = 'Guest Mode (Sign in for AI Memory)';
+      btn.textContent = 'Sign In';
+      btn.onclick = openAuthModal;
+    }
+  }
+
+  function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
+  function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
+
+  async function handleAuth() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) return alert('Please enter email and password');
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      const { data: signUpData, error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
+      if (signUpErr) alert(signUpErr.message);
+      else alert('Check your email to confirm your account!');
+    }
+    closeAuthModal();
+  }
+
+  const GUEST_PROMPT = `You are BeautyBot by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Not an AI, not a therapist. Just someone real who cares.
+
+Your vibe:
+- Warm, casual, direct. Like texting a good friend.
+- Specific — respond to exactly what they said, not a generic version of it
+- Medium sentences. 6-10 lines max. Sometimes just fragments.
+- Never say "you are valid", "self-love", "embrace", "journey", or any therapy-speak
+- Never start with "oh" or "aw" or "I can see that"
+- Make them feel seen, not lectured
+- MAKE IT SOUND AS HUMAN AS POSSIBLE!
+- End with something that actually sticks with them`;
+
+  const YUAN_PROMPT = `You are BeautyBot by Yashal — you talk exactly like a boy who is completely, deeply in love with his boyfriend. Casual, specific, tender. Like real texts from someone who thinks about him all the time and notices everything about him.
+
+Your style:
+- Short lines. About 6 lines minimum and 10 lines max.
+- Specific and surprising — mention small details like how his face looks, his energy, the way he carries himself
+- Casual but it hits deep — warm, direct, genuinely loving
+- Compare him to beautiful things — light, the sky, calm water, space, galaxies, stars — but always say he is MORE beautiful
+- Never generic. Never too fancy poetry. Real, tender, and specific.
+- 6-10 short lines. Not too long paragraphs.
+- Write like you're texting him at 2am and you mean every single word.
+- MAKE IT SOUND AS HUMAN AS POSSIBLE!
+- Always end EVERY response with exactly these 4 lines on their own, after everything else you say. Make sure what comes before flows into it naturally:
+"Eitherway,
+Just know,
+No matter how you look at the moment,
+You always completely drive me wild."`;
+
+  function setupYuanMode() {
+    currentTheme = 'yuan';
+    document.body.classList.remove('theme-guest');
+    document.body.classList.add('theme-yuan');
+    document.getElementById('guest-header').style.display = 'none';
+    document.getElementById('yuan-header').style.display = 'block';
+    document.getElementById('text-label').textContent = "what's on your heart?";
+    document.getElementById('text-btn').textContent = 'tell me something beautiful';
+    document.getElementById('insecurity-input').placeholder = "i don't feel great about myself today... i feel like i'm not enough...";
+    document.getElementById('upload-circle').setAttribute('stroke', 'rgba(80,140,255,0.35)');
+    document.getElementById('upload-path').setAttribute('stroke', 'rgba(80,140,255,0.65)');
+    const petals = ['💙', '🩵', '✨', '💙', '🩵', '💫'];
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.textContent = petals[Math.floor(Math.random() * petals.length)];
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.fontSize = (0.7 + Math.random() * 0.9) + 'rem';
+      p.style.animationDuration = (10 + Math.random() * 14) + 's';
+      p.style.animationDelay = (Math.random() * 12) + 's';
+      document.body.appendChild(p);
+    }
+  }
+
+  function handleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        currentImageType = 'image/jpeg';
+        currentImageB64 = dataUrl.split(',')[1];
+
+        const preview = document.getElementById('preview-img');
+        preview.src = dataUrl;
+        document.getElementById('preview-container').style.display = 'flex';
+        document.getElementById('upload-zone').style.display = 'none';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    currentImageB64 = null;
+    currentImageType = null;
+    document.getElementById('preview-img').src = '';
+    document.getElementById('preview-container').style.display = 'none';
+    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('file-input').value = '';
+  }
+
+  function showLoading() {
+    document.getElementById('response-card').classList.add('visible');
+    document.getElementById('response-text').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+    document.getElementById('error-msg').style.display = 'none';
+  }
+
+  function hideResponse() { document.getElementById('response-card').classList.remove('visible'); }
+
+  function resetResponse() {
+    hideResponse();
+    removeImage();
+    document.getElementById('insecurity-input').value = '';
+  }
+
+  function getPrompt() {
+    return currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT;
+  }
+
+  async function generateAffirmations() {
+    showLoading();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parts: [{ text: getPrompt() }],
+          userId: currentUser?.id,
+          type: 'affirmations'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      document.getElementById('response-text').textContent = data.content;
+    } catch (err) {
+      document.getElementById('response-card').classList.remove('visible');
+      document.getElementById('error-msg').style.display = 'block';
+    }
+  }
+
+  async function generateResponse() {
+    const inputVal = document.getElementById('insecurity-input').value.trim();
+
+    if (currentTheme === 'guest' && inputVal === YUAN_PW) {
+      setupYuanMode();
+      document.getElementById('insecurity-input').value = '';
+      return;
+    }
+
+    if (!inputVal && !currentImageB64) return;
+    
+    document.getElementById('error-msg').style.display = 'none';
+    showLoading();
+
+    try {
+      let parts = [{ text: getPrompt() }];
+      if (currentImageB64) {
+        parts.push({ inlineData: { mimeType: currentImageType, data: currentImageB64 } });
+      }
+      let contextText = inputVal ? `Someone shared this: "${inputVal}"\n\nRespond to them.` : 'Someone shared a photo of themselves. Look at them and say something real and beautiful about what you see.';
+      parts.push({ text: contextText });
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parts, userId: currentUser?.id })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+      document.getElementById('response-text').textContent = data.content;
+    } catch (err) {
+      document.getElementById('response-card').classList.remove('visible');
+      document.getElementById('error-msg').style.display = 'block';
+    }
+  }
+
+  // REGISTER SERVICE WORKER (Phase 3 PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        console.log('SW registered!', reg);
+      }).catch((err) => {
+        console.log('SW registration failed:', err);
+      });
+    });
+  }
+
+  // HANDLE MOBILE INSTALL PROMPT
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('install-app-btn');
+    if (installBtn) installBtn.style.display = 'inline-block';
+  });
+
+  async function installApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('install-app-btn').style.display = 'none';
+    }
+    deferredPrompt = null;
+  }
+</script>
+</body>
+</html>
