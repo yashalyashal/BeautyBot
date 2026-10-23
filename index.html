@@ -67,6 +67,7 @@
     .top-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     .nav-btn { background: transparent; border: 1px solid rgba(200,160,255,0.25); color: rgba(200,180,240,0.9); padding: 0.4rem 0.85rem; border-radius: 20px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
     .nav-btn:hover { background: rgba(200,160,255,0.15); }
+    .call-btn { background: linear-gradient(135deg, #28a745, #208637); border: none; color: white; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.78rem; font-weight: bold; cursor: pointer; }
 
     .chat-stream { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-width: 760px; width: 100%; margin: 0 auto; }
     
@@ -96,7 +97,16 @@
     .modal-submit { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
     .modal-close { margin-top: 0.75rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; width: 100%; text-align: center; }
 
-    /* Custom Voice Range Controls */
+    /* CALL UI STYLING */
+    .call-overlay { position: fixed; inset: 0; background: #08050e; display: none; flex-direction: column; justify-content: space-between; align-items: center; z-index: 200; padding: 3rem 1.5rem; }
+    .call-avatar { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #8c50f0, #4a7de8); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; box-shadow: 0 0 40px rgba(140,80,240,0.4); animation: pulse 2s infinite ease-in-out; }
+    @keyframes pulse { 0% { transform: scale(0.98); box-shadow: 0 0 20px rgba(140,80,240,0.3); } 50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(140,80,240,0.6); } 100% { transform: scale(0.98); box-shadow: 0 0 20px rgba(140,80,240,0.3); } }
+    .call-status { text-align: center; margin-top: 1rem; }
+    .call-status-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #e3d2ff; }
+    .call-timer { font-size: 0.9rem; color: rgba(200,180,240,0.6); margin-top: 0.4rem; }
+    .call-live-text { max-width: 500px; width: 100%; text-align: center; font-size: 1.1rem; color: #ede0ff; min-height: 80px; padding: 1rem; line-height: 1.5; font-family: 'Playfair Display', serif; }
+    .end-call-btn { background: #dc3545; color: white; border: none; width: 68px; height: 68px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(220,53,69,0.5); }
+
     .pitch-controls-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.15); padding: 1rem; border-radius: 16px; margin-bottom: 1rem; }
     .pitch-slider-wrapper { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
     .pitch-slider { flex: 1; accent-color: #8c50f0; cursor: pointer; }
@@ -131,6 +141,7 @@
         <span style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #e3d2ff;" id="app-heading">BeautyBott</span>
       </div>
       <div class="top-actions">
+        <button class="call-btn" onclick="startCallSession()">📞 Call</button>
         <button class="nav-btn" onclick="exportChatTranscript()">📥 Export</button>
         <button class="nav-btn" onclick="generateAffirmations()">✨ Affirmations</button>
         <button class="nav-btn" onclick="openModal('prefs-modal')">⚙️ Preferences</button>
@@ -166,7 +177,21 @@
   </div>
 </div>
 
-<!-- PREFERENCES MODAL WITH CUSTOM PITCH SLIDER & PREVIEW -->
+<!-- FULLSCREEN CALL UI -->
+<div class="call-overlay" id="call-overlay">
+  <div class="call-status">
+    <div class="call-status-title" id="call-partner-name">BeautyBott</div>
+    <div class="call-timer" id="call-timer">00:00 • Active Call</div>
+  </div>
+
+  <div class="call-avatar">✨</div>
+
+  <div class="call-live-text" id="call-live-text">Listening...</div>
+
+  <button class="end-call-btn" onclick="endCallSession()">📞</button>
+</div>
+
+<!-- PREFERENCES MODAL -->
 <div class="modal-overlay" id="prefs-modal">
   <div class="modal-box">
     <div class="modal-title">Account Preferences</div>
@@ -181,7 +206,6 @@
       <option value="custom">Custom Range</option>
     </select>
 
-    <!-- PITCH RANGE CONTROLLER -->
     <div class="pitch-controls-box">
       <label style="font-size:0.8rem; color:rgba(200,180,240,0.7); display:flex; justify-content:space-between;">
         <span>Custom Pitch Range</span>
@@ -239,6 +263,12 @@
   let activeConversationId = null;
   let conversationMessages = [];
 
+  // CALL ENGINE VARIABLES
+  let isCallActive = false;
+  let callTimerInterval = null;
+  let callSeconds = 0;
+  let recognitionEngine = null;
+
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -251,12 +281,11 @@
     });
   }
 
-  // Init Voice Preference Controls
   document.getElementById('pref-voice').value = selectedVoiceGender;
   document.getElementById('pitch-slider').value = customPitchValue;
   document.getElementById('pitch-val-display').textContent = parseFloat(customPitchValue).toFixed(2);
 
-  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human.`;
+  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human. Keep answers concise for call mode.`;
   const YUAN_PROMPT = `You are BeautyBott by Yashal — warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
 
   function toggleSidebar() {
@@ -308,7 +337,6 @@
   }
 
   function getBestVoice(gender, voices) {
-    // Priority 1: Natural/Neural Online Voices (Microsoft Guy/Ryan/Online or Google)
     if (gender === 'girl') {
       return voices.find(v => v.name.includes('Natural') && (v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Female'))) ||
              voices.find(v => v.name.includes('Google UK English Female')) ||
@@ -320,6 +348,113 @@
     }
   }
 
+  // CALL SESSION ENGINE
+  function startCallSession() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert('Voice recognition is not supported in this browser. Try Chrome or Edge!');
+
+    isCallActive = true;
+    document.getElementById('call-overlay').style.display = 'flex';
+    callSeconds = 0;
+    
+    callTimerInterval = setInterval(() => {
+      callSeconds++;
+      const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+      const s = String(callSeconds % 60).padStart(2, '0');
+      document.getElementById('call-timer').textContent = `${m}:${s} • Active Call`;
+    }, 1000);
+
+    initSpeechRecognition();
+  }
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionEngine = new SpeechRecognition();
+    recognitionEngine.continuous = false;
+    recognitionEngine.interimResults = false;
+    recognitionEngine.lang = 'en-US';
+
+    recognitionEngine.onstart = () => {
+      document.getElementById('call-live-text').textContent = 'Listening to you...';
+    };
+
+    recognitionEngine.onresult = async (e) => {
+      const spokenText = e.results[0][0].transcript;
+      if (!spokenText.trim()) return;
+
+      document.getElementById('call-live-text').textContent = `"${spokenText}"`;
+      appendBubble('user', spokenText);
+      conversationMessages.push({ role: 'user', content: spokenText });
+
+      // Send spoken query to AI
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: conversationMessages,
+            userId: currentUser?.id,
+            systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
+          })
+        });
+
+        const data = await res.json();
+        const reply = data.content;
+
+        document.getElementById('call-live-text').textContent = reply;
+        appendBubble('assistant', reply);
+        conversationMessages.push({ role: 'assistant', content: reply });
+
+        // Speak back
+        speakCallResponse(reply, () => {
+          if (isCallActive) initSpeechRecognition();
+        });
+
+      } catch (err) {
+        document.getElementById('call-live-text').textContent = "Connection error...";
+      }
+    };
+
+    recognitionEngine.onerror = () => {
+      if (isCallActive) setTimeout(() => initSpeechRecognition(), 1000);
+    };
+
+    recognitionEngine.start();
+  }
+
+  function speakCallResponse(text, onComplete) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.pitch = customPitchValue;
+    utterance.rate = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const targetVoice = getBestVoice(selectedVoiceGender, voices);
+    if (targetVoice) utterance.voice = targetVoice;
+
+    utterance.onend = () => { if (onComplete) onComplete(); };
+    utterance.onerror = () => { if (onComplete) onComplete(); };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function endCallSession() {
+    isCallActive = false;
+    clearInterval(callTimerInterval);
+    if (recognitionEngine) recognitionEngine.stop();
+    window.speechSynthesis.cancel();
+    document.getElementById('call-overlay').style.display = 'none';
+
+    // Auto-save call transcript into Supabase chat log
+    if (currentUser && supabaseClient && activeConversationId) {
+      conversationMessages.forEach(async (m) => {
+        await supabaseClient.from('messages').insert([{ conversation_id: activeConversationId, sender: m.role, content: m.content }]);
+      });
+      loadUserConversations();
+    }
+  }
+
+  // REST OF ENGINE (Chat, Export, Preferences)
   function previewVoiceSetting() {
     if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported.');
     window.speechSynthesis.cancel();
@@ -383,7 +518,6 @@
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     const voices = window.speechSynthesis.getVoices();
 
-    // Apply pitch range and natural voice targeting
     utterance.pitch = customPitchValue;
     utterance.rate = 0.98;
 
