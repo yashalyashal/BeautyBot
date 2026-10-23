@@ -11,13 +11,45 @@ module.exports = async function handler(req, res) {
 
   try {
     const { messages, userId, systemPrompt, type } = req.body;
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+
+    if (!openRouterKey) {
+      return res.status(500).json({ error: 'Server configuration error: missing OPENROUTER_API_KEY' });
+    }
+
+    // Special handler for auto-generating thread titles
+    if (type === 'generate-title') {
+      const titlePrompt = [
+        { role: 'system', content: 'You are an assistant that creates concise 3-5 word titles for chat conversations. Return ONLY the title text with no quotes or punctuation.' },
+        { role: 'user', content: `Generate a short title for a chat starting with: "${messages[0]?.content || 'Hello'}"` }
+      ];
+
+      const titleRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openRouterKey}`,
+          'HTTP-Referer': 'https://beautybott.vercel.app',
+          'X-Title': 'BeautyBott Title Generator',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          max_tokens: 20,
+          messages: titlePrompt
+        })
+      });
+
+      const titleData = await titleRes.json();
+      const generatedTitle = titleData.choices?.[0]?.message?.content?.trim() || 'New Conversation';
+      return res.status(200).json({ title: generatedTitle });
+    }
+
     let memoryContext = "";
     let userPrefContext = "";
 
-    // 1. Fetch user memories and user preferences if logged in
+    // Fetch user memories and preferences if logged in
     if (supabase && userId) {
       try {
-        // Fetch memories
         const { data: memories } = await supabase
           .from('memories')
           .select('content')
@@ -27,10 +59,9 @@ module.exports = async function handler(req, res) {
 
         if (memories && memories.length > 0) {
           const pastInsecurities = memories.map(m => m.content).join("; ");
-          memoryContext = `\n[USER MEMORY: The user has previously mentioned or struggled with: ${pastInsecurities}. Keep this in mind seamlessly without explicitly reciting list format.]`;
+          memoryContext = `\n[USER MEMORY: The user has previously mentioned or struggled with: ${pastInsecurities}. Keep this in mind seamlessly.]`;
         }
 
-        // Fetch custom user preferences
         const { data: prefs } = await supabase
           .from('user_preferences')
           .select('preferred_name, communication_style, custom_instructions')
@@ -47,26 +78,13 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const openRouterKey = process.env.OPENROUTER_API_KEY;
-    if (!openRouterKey) {
-      return res.status(500).json({ error: 'Server configuration error: missing OPENROUTER_API_KEY' });
-    }
-
-    // Build complete system instruction
     let fullSystemInstruction = systemPrompt || 'You are BeautyBott by Yashal, a deeply empathetic, uplifting, and warm personal assistant.';
     if (userPrefContext) fullSystemInstruction += userPrefContext;
     if (memoryContext) fullSystemInstruction += memoryContext;
 
-    // Build payload messages for OpenRouter
-    let formattedMessages = [
-      { role: 'system', content: fullSystemInstruction }
-    ];
-
+    let formattedMessages = [{ role: 'system', content: fullSystemInstruction }];
     if (Array.isArray(messages)) {
       formattedMessages = formattedMessages.concat(messages);
-    } else if (req.body.parts) {
-      // Fallback compatibility for single-turn requests
-      formattedMessages.push({ role: 'user', content: req.body.parts });
     }
 
     const openRouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -86,12 +104,10 @@ module.exports = async function handler(req, res) {
 
     const data = await openRouterRes.json();
     if (!openRouterRes.ok) {
-      console.error("OpenRouter error response:", data);
       throw new Error(data.error?.message || 'OpenRouter API call failed');
     }
 
     const reply = data.choices?.[0]?.message?.content || "You are wonderful just as you are.";
-
     return res.status(200).json({ content: reply });
   } catch (err) {
     console.error('Chat API error:', err);
