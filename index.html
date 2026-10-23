@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeautyBott by Yashal</title>
   
-  <!-- Open Graph / Social Preview Meta Tags -->
   <meta property="og:title" content="BeautyBott by Yashal" />
   <meta property="og:description" content="You are more beautiful than you know." />
   <meta property="og:type" content="website" />
@@ -18,7 +17,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="BeautyBott by Yashal" />
   <meta name="theme-color" content="#0d0a12" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,7 +32,7 @@
     body.theme-yuan { background: #00060f; color: #e0eeff; }
     body.theme-yuan::before {
       content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse at 20% 20%, rgba(30,80,200,0.18) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(20,50,160,0.14) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(40,100,220,0.07) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 20% 20%, rgba(30,80,200,0.18) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(20,50,160,0.14) 0%, transparent 55%);
     }
 
     .petal { position: fixed; pointer-events: none; z-index: 0; animation: fall linear infinite; opacity: 0; }
@@ -43,181 +42,129 @@
       100% { transform: translateY(105vh) rotate(400deg); opacity: 0; }
     }
 
-    #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; display: block; }
-
-    /* AUTH & INSTALL BAR */
-    .auth-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
-    .auth-status { color: rgba(200,180,240,0.6); }
-    .auth-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .auth-btn { background: transparent; border: 1px solid rgba(200,160,255,0.3); color: rgba(200,180,240,0.9); padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
-    .auth-btn:hover { background: rgba(200,160,255,0.15); border-color: rgba(200,160,255,0.6); }
-
-    /* AFFIRMATION BAR */
-    .affirmation-bar { margin-bottom: 2rem; text-align: center; }
-    .affirm-btn { background: rgba(140,80,240,0.15); border: 1px solid rgba(180,130,255,0.35); color: #e3d2ff; padding: 0.65rem 1.4rem; border-radius: 30px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; }
-    .affirm-btn:hover { background: rgba(140,80,240,0.3); box-shadow: 0 0 20px rgba(160,100,255,0.35); transform: translateY(-1px); }
-
-    /* HEADERS */
-    .guest-header { text-align: center; margin-bottom: 2.5rem; }
-    .guest-logo {
-      font-family: 'Playfair Display', serif; font-size: 3.2rem; font-weight: 400;
-      background: linear-gradient(135deg, #c9a8ff, #7eb8ff, #ffafd0);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.3rem;
+    /* LAYOUT: SIDEBAR + MAIN CHAT */
+    .app-container { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+    
+    /* SIDEBAR DRAWER */
+    .sidebar {
+      width: 280px; background: rgba(10, 7, 16, 0.85); border-right: 1px solid rgba(200,160,255,0.12);
+      backdrop-filter: blur(10px); display: flex; flex-direction: column; transition: transform 0.3s ease;
+      position: fixed; top: 0; bottom: 0; left: 0; z-index: 50;
     }
-    .guest-sub-author { font-size: 0.82rem; color: rgba(200,160,255,0.55); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; }
-    .guest-tagline { font-size: 0.85rem; color: rgba(200,180,240,0.45); letter-spacing: 0.12em; text-transform: uppercase; }
+    .sidebar.closed { transform: translateX(-100%); }
+    .sidebar-header { padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200,160,255,0.1); }
+    .new-chat-btn {
+      width: 100%; padding: 0.65rem 1rem; background: rgba(140,80,240,0.15); border: 1px solid rgba(180,130,255,0.3);
+      color: #e3d2ff; border-radius: 12px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; margin-top: 0.75rem; text-align: left;
+    }
+    .new-chat-btn:hover { background: rgba(140,80,240,0.3); }
+    .convos-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .convo-item {
+      padding: 0.65rem 0.85rem; border-radius: 10px; font-size: 0.82rem; color: rgba(200,180,240,0.7);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
+    }
+    .convo-item:hover, .convo-item.active { background: rgba(200,160,255,0.1); color: #fff; }
+    .convo-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+    .delete-convo-btn { opacity: 0; background: transparent; border: none; color: rgba(255,100,100,0.7); cursor: pointer; font-size: 0.8rem; }
+    .convo-item:hover .delete-convo-btn { opacity: 1; }
 
-    .yuan-header { text-align: center; margin-bottom: 2.5rem; display: none; }
-    .yuan-hearts { font-size: 1.1rem; letter-spacing: 0.4em; color: rgba(80,140,255,0.55); margin-bottom: 0.75rem; }
-    .yuan-logo { font-family: 'Cormorant Garamond', serif; font-size: 3.4rem; font-weight: 300; font-style: italic; color: #a8c8ff; line-height: 1; margin-bottom: 0.6rem; }
-    .yuan-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: rgba(140,180,255,0.5); }
+    /* MAIN VIEW */
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; margin-left: 0; transition: margin-left 0.3s ease; }
+    .main-content.sidebar-open { margin-left: 280px; }
 
-    .field-label { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
-    .theme-guest .field-label { color: rgba(200,180,240,0.45); }
-    .theme-yuan .field-label { color: rgba(100,160,255,0.5); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; text-transform: none; letter-spacing: 0.06em; }
+    /* TOP NAV BAR */
+    .top-nav { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200,160,255,0.08); background: rgba(13,10,18,0.6); backdrop-filter: blur(8px); }
+    .toggle-sidebar-btn { background: transparent; border: 1px solid rgba(200,160,255,0.25); color: #e3d2ff; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
+    .top-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .nav-btn { background: transparent; border: 1px solid rgba(200,160,255,0.25); color: rgba(200,180,240,0.9); padding: 0.4rem 0.85rem; border-radius: 20px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+    .nav-btn:hover { background: rgba(200,160,255,0.15); }
 
-    textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 300; padding: 1.2rem 1.4rem; resize: none; outline: none; line-height: 1.75; transition: border-color 0.3s; margin-bottom: 1.5rem; }
-    .theme-guest textarea { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(200,160,255,0.18); color: #f0eaf8; border-radius: 18px; }
-    .theme-guest textarea::placeholder { color: rgba(200,180,240,0.2); }
-    .theme-guest textarea:focus { border-color: rgba(200,160,255,0.45); }
-    .theme-yuan textarea { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(80,140,255,0.2); color: #e0eeff; border-radius: 18px; }
-    .theme-yuan textarea::placeholder { color: rgba(100,160,255,0.25); }
-    .theme-yuan textarea:focus { border-color: rgba(80,140,255,0.45); }
+    /* CHAT STREAM CONTAINER */
+    .chat-stream { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-width: 760px; width: 100%; margin: 0 auto; }
+    
+    .chat-bubble { max-width: 85%; padding: 1rem 1.25rem; border-radius: 18px; line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap; position: relative; }
+    .chat-bubble.user { align-self: flex-end; background: rgba(140,80,240,0.25); border: 1px solid rgba(180,130,255,0.3); color: #f5efff; border-bottom-right-radius: 4px; }
+    .chat-bubble.assistant { align-self: flex-start; background: rgba(255,255,255,0.04); border: 1px solid rgba(200,160,255,0.15); color: #ede0ff; border-bottom-left-radius: 4px; font-family: 'Playfair Display', serif; }
+    .theme-yuan .chat-bubble.assistant { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: #c8dcff; border-color: rgba(80,140,255,0.2); }
 
-    .upload-zone { padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; margin-bottom: 1.5rem; }
-    .theme-guest .upload-zone { border: 1.5px dashed rgba(200,160,255,0.22); background: rgba(255,255,255,0.02); border-radius: 20px; }
-    .theme-guest .upload-zone:hover { border-color: rgba(200,160,255,0.5); background: rgba(150,80,255,0.05); }
-    .theme-yuan .upload-zone { border: 1.5px dashed rgba(80,140,255,0.25); background: rgba(255,255,255,0.02); border-radius: 20px; }
-    .theme-yuan .upload-zone:hover { border-color: rgba(80,140,255,0.55); background: rgba(30,80,220,0.05); }
-    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon { width: 32px; height: 32px; margin: 0 auto 0.5rem; opacity: 0.35; }
-    .upload-text { font-size: 0.82rem; line-height: 1.4; }
-    .theme-guest .upload-text { color: rgba(200,180,240,0.45); }
-    .theme-guest .upload-text strong { color: rgba(200,160,255,0.75); font-weight: 400; }
-    .theme-yuan .upload-text { color: rgba(100,160,255,0.5); }
-    .theme-yuan .upload-text strong { color: rgba(100,160,255,0.8); font-weight: 400; }
+    /* BOTTOM INPUT AREA */
+    .input-wrapper { max-width: 760px; width: 100%; margin: 0 auto; padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .input-box { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.2); border-radius: 24px; padding: 0.5rem 0.75rem 0.5rem 1.25rem; align-items: flex-end; }
+    textarea { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; resize: none; max-height: 120px; line-height: 1.5; padding: 0.4rem 0; }
+    textarea::placeholder { color: rgba(200,180,240,0.3); }
+    .send-btn { background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .attach-btn { background: transparent; border: none; color: rgba(200,180,240,0.6); cursor: pointer; padding: 0.4rem; font-size: 1.1rem; }
 
-    .preview-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; display: none; }
-    .preview-img { width: 70px; height: 70px; object-fit: cover; }
-    .theme-guest .preview-img { border: 0.5px solid rgba(200,160,255,0.18); border-radius: 12px; }
-    .theme-yuan .preview-img { border: 0.5px solid rgba(80,140,255,0.25); border-radius: 12px; }
-    .remove-img-btn { background: transparent; border: none; cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
-    .theme-guest .remove-img-btn { color: rgba(200,160,255,0.6); }
-    .theme-yuan .remove-img-btn { color: rgba(100,160,255,0.6); }
+    /* PREVIEW THUMBNAIL */
+    .preview-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: rgba(200,180,240,0.7); display: none; }
+    .preview-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
 
-    .conjure-btn { width: 100%; padding: 1rem; border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 0.03em; }
-    .theme-guest .conjure-btn { background: linear-gradient(135deg, #7b3fe4, #4a7de8); font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.05rem; border-radius: 50px; color: white; }
-    .theme-guest .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(120,60,220,0.35); }
-    .theme-yuan .conjure-btn { background: linear-gradient(135deg, #1a4ac4, #426ee8); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; font-weight: 300; border-radius: 50px; color: white; }
-    .theme-yuan .conjure-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,80,200,0.4); }
-    .conjure-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
-    .response-card { margin-top: 2rem; display: none; }
-    .response-card.visible { display: block; }
-    .response-inner { padding: 2.2rem 2rem 1.75rem; position: relative; }
-    .theme-guest .response-inner { background: linear-gradient(145deg, rgba(100,50,200,0.1), rgba(50,80,200,0.07)); border: 0.5px solid rgba(200,160,255,0.18); border-radius: 22px; }
-    .theme-yuan .response-inner { background: linear-gradient(145deg, rgba(20,50,180,0.1), rgba(30,80,220,0.07)); border: 0.5px solid rgba(80,140,255,0.2); border-radius: 22px; }
-    .response-inner::before { content: '\201C'; position: absolute; top: 0.4rem; left: 1.25rem; font-family: 'Playfair Display', serif; font-size: 5rem; line-height: 1; pointer-events: none; }
-    .theme-guest .response-inner::before { color: rgba(200,160,255,0.1); }
-    .theme-yuan .response-inner::before { color: rgba(80,140,255,0.1); }
-
-    .response-text { line-height: 1.95; font-weight: 400; white-space: pre-wrap; min-height: 60px; }
-    .theme-guest .response-text { font-family: 'Playfair Display', serif; font-size: 1.08rem; color: #ede0ff; }
-    .theme-yuan .response-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: #c8dcff; line-height: 2.1; }
-
-    .card-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
-    .response-action-btn { padding: 0.45rem 1.25rem; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; transition: all 0.3s; border-radius: 50px; }
-    .theme-guest .response-action-btn { border: 0.5px solid rgba(200,160,255,0.22); color: rgba(200,160,255,0.6); }
-    .theme-guest .response-action-btn:hover { border-color: rgba(200,160,255,0.5); color: rgba(200,160,255,0.95); background: rgba(200,160,255,0.05); }
-    .theme-yuan .response-action-btn { border: 0.5px solid rgba(80,140,255,0.25); color: rgba(100,160,255,0.6); }
-    .theme-yuan .response-action-btn:hover { border-color: rgba(80,140,255,0.55); color: rgba(120,170,255,0.95); background: rgba(80,140,255,0.05); }
-
-    .loading-dots { display: inline-flex; gap: 5px; align-items: center; }
-    .loading-dots span { width: 6px; height: 6px; border-radius: 50%; animation: bounce 1.2s infinite; }
-    .theme-guest .loading-dots span { background: rgba(200,160,255,0.55); }
-    .theme-yuan .loading-dots span { background: rgba(80,140,255,0.6); }
-    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
-
-    .error-banner { margin-top: 1.5rem; padding: 1.25rem; border-radius: 16px; background: rgba(255,80,80,0.08); border: 1px solid rgba(255,100,100,0.25); text-align: center; display: none; }
-    .error-text { font-size: 0.85rem; color: rgba(255,180,180,0.9); margin-bottom: 0.75rem; }
-    .retry-btn { padding: 0.4rem 1.2rem; background: rgba(255,100,100,0.2); border: 1px solid rgba(255,100,100,0.4); color: #ffdede; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
-    .retry-btn:hover { background: rgba(255,100,100,0.35); }
-
+    /* MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-    .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; color: #f0eaf8; }
-    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; color: #e3d2ff; }
-    .modal-input { width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,160,255,0.2); border-radius: 12px; color: #fff; outline: none; }
-    .modal-submit { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; }
-    .modal-close { margin-top: 1rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; }
+    .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2rem; border-radius: 24px; width: 90%; max-width: 440px; color: #f0eaf8; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 1rem; text-align: center; color: #e3d2ff; }
+    .modal-input { width: 100%; padding: 0.75rem 1rem; margin-bottom: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,160,255,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 0.9rem; }
+    .modal-submit { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
+    .modal-close { margin-top: 0.75rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; width: 100%; text-align: center; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 240px; }
+      .main-content.sidebar-open { margin-left: 0; }
+    }
   </style>
 </head>
 <body class="theme-guest">
 
-<div id="app">
-  <div class="auth-bar">
-    <div class="auth-status" id="user-status">Guest Mode (Sign in for AI Memory)</div>
-    <div class="auth-actions">
-      <button class="auth-btn" id="install-app-btn" onclick="installApp()" style="display: none;">📲 Install App</button>
-      <button class="auth-btn" onclick="openModal('credits-modal')">Credits</button>
-      <button class="auth-btn" onclick="openModal('privacy-modal')">Privacy</button>
-      <!-- Updated Feedback email link -->
-      <a class="auth-btn" href="mailto:beautybott2025@gmail.com?subject=BeautyBott%20Feedback" style="text-decoration: none;">Feedback</a>
-      <button class="auth-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+<div class="app-container">
+  <!-- SIDEBAR DRAWER -->
+  <div class="sidebar closed" id="sidebar">
+    <div class="sidebar-header">
+      <span style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #e3d2ff;">Chat History</span>
+      <button onclick="toggleSidebar()" style="background:transparent; border:none; color:#a080d0; cursor:pointer;">✕</button>
+    </div>
+    <div style="padding: 0 0.75rem;">
+      <button class="new-chat-btn" onclick="createNewChat()">+ New Conversation</button>
+    </div>
+    <div class="convos-list" id="convos-list">
+      <!-- Conversation threads rendered dynamically -->
     </div>
   </div>
 
-  <div class="affirmation-bar">
-    <button class="affirm-btn" onclick="generateAffirmations()">✨ 3 Daily Affirmations for Me</button>
-  </div>
-
-  <div class="guest-header" id="guest-header">
-    <div class="guest-logo">BeautyBott</div>
-    <div class="guest-sub-author">by Yashal</div>
-    <div class="guest-tagline">you are more beautiful than you know</div>
-  </div>
-
-  <div class="yuan-header" id="yuan-header">
-    <div class="yuan-hearts">💙 ♡ 💙</div>
-    <div class="yuan-logo">for you, always</div>
-    <div class="yuan-tagline">you are more beautiful than you think</div>
-  </div>
-
-  <div id="panel-text" class="panel active">
-    <div class="field-label" id="text-label">what's been weighing on you?</div>
-    <textarea id="insecurity-input" rows="5" placeholder="i don't like how i look today... i feel like i'm not enough..."></textarea>
-    
-    <div id="preview-container" class="preview-container">
-      <img id="preview-img" class="preview-img" alt="Attached photo" />
-      <button class="remove-img-btn" onclick="removeImage()">remove photo</button>
+  <!-- MAIN CHAT INTERFACE -->
+  <div class="main-content" id="main-content">
+    <div class="top-nav">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button class="toggle-sidebar-btn" onclick="toggleSidebar()">☰ Threads</button>
+        <span style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #e3d2ff;" id="app-heading">BeautyBott</span>
+      </div>
+      <div class="top-actions">
+        <button class="nav-btn" onclick="generateAffirmations()">✨ Affirmations</button>
+        <button class="nav-btn" onclick="openModal('prefs-modal')">⚙️ Preferences</button>
+        <button class="nav-btn" onclick="openModal('credits-modal')">Credits</button>
+        <a class="nav-btn" href="mailto:beautybott2025@gmail.com?subject=BeautyBott%20Feedback" style="text-decoration:none;">Feedback</a>
+        <button class="nav-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+      </div>
     </div>
 
-    <div class="upload-zone" id="upload-zone">
-      <input type="file" accept="image/*" id="file-input" onchange="handleFile(this)" />
-      <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
-        <circle cx="24" cy="24" r="22" stroke="rgba(200,160,255,0.35)" stroke-width="1.2" id="upload-circle"/>
-        <path d="M24 32V16M24 16l-7 7M24 16l7 7" stroke="rgba(200,160,255,0.65)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" id="upload-path"/>
-      </svg>
-      <div class="upload-text" id="upload-text-label"><strong>attach a photo (optional)</strong><br>drop here or tap</div>
+    <div class="chat-stream" id="chat-stream">
+      <div class="chat-bubble assistant">
+        Hello! I'm BeautyBott by Yashal. How are you feeling today? Share whatever is on your mind, or ask for something beautiful.
+      </div>
     </div>
 
-    <button class="conjure-btn" id="text-btn" onclick="generateResponse()">conjure something beautiful for me</button>
-  </div>
+    <div class="input-wrapper">
+      <div class="preview-bar" id="preview-bar">
+        <img class="preview-thumb" id="preview-thumb" />
+        <span>Photo attached</span>
+        <button onclick="removeImage()" style="background:transparent; border:none; color:#ff8080; cursor:pointer;">Remove</button>
+      </div>
 
-  <div class="error-banner" id="error-banner">
-    <div class="error-text" id="error-text">Network busy or rate limit hit. Let's try that again.</div>
-    <button class="retry-btn" onclick="retryLastAction()">🔄 Try Again</button>
-  </div>
-
-  <div class="response-card" id="response-card">
-    <div class="response-inner">
-      <div class="response-text" id="response-text"></div>
-    </div>
-    <div class="card-actions">
-      <button class="response-action-btn" id="copy-btn" onclick="copyResponse()">📋 Copy</button>
-      <button class="response-action-btn" onclick="resetResponse()">✨ Ask Again</button>
+      <div class="input-box">
+        <input type="file" accept="image/*" id="file-input" style="display:none;" onchange="handleFile(this)" />
+        <button class="attach-btn" onclick="document.getElementById('file-input').click()">📷</button>
+        <textarea id="user-input" rows="1" placeholder="Tell me what's on your heart..." onkeydown="handleKeyDown(event)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">➔</button>
+      </div>
     </div>
   </div>
 </div>
@@ -225,57 +172,57 @@
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal-box">
-    <div class="modal-title">Welcome to BeautyBott</div>
+    <div class="modal-title">BeautyBott Account</div>
     <input type="email" id="auth-email" class="modal-input" placeholder="Email address" />
     <input type="password" id="auth-password" class="modal-input" placeholder="Password" />
     <button class="modal-submit" onclick="handleAuth()">Continue</button>
-    <button class="modal-close" onclick="closeAuthModal()">Cancel</button>
+    <button class="modal-close" onclick="closeModal('auth-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- PREFERENCES & MEMORY MODAL -->
+<div class="modal-overlay" id="prefs-modal">
+  <div class="modal-box">
+    <div class="modal-title">Account Preferences</div>
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Preferred Name</label>
+    <input type="text" id="pref-name" class="modal-input" placeholder="How should BeautyBott call you?" />
+
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Custom Instructions</label>
+    <textarea id="pref-instructions" class="modal-input" rows="3" placeholder="Any specific tone or reminders for your AI?"></textarea>
+
+    <button class="modal-submit" onclick="savePreferences()">Save Preferences</button>
+    <button class="modal-close" onclick="closeModal('prefs-modal')">Close</button>
   </div>
 </div>
 
 <!-- CREDITS MODAL -->
 <div class="modal-overlay" id="credits-modal">
   <div class="modal-box" style="max-width: 440px; text-align: left;">
-    <div class="modal-title" style="text-align: center;">BeautyBott by Yashal</div>
-    <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.5rem;">Built with care, dedication, and late nights.</div>
-    
-    <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; margin-bottom: 1.5rem;">
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(200,160,255,0.1); padding-bottom: 0.5rem;">
-        <span style="color: rgba(200,180,240,0.5);">Created & Developed By</span>
-        <span style="color: #e3d2ff; font-weight: 400;">Yashal</span>
+    <div class="modal-title">BeautyBott by Yashal</div>
+    <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.25rem;">Built with care, dedication, and late nights.</div>
+    <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
+        <span style="color:rgba(200,180,240,0.5);">Created & Developed By</span>
+        <span style="color:#e3d2ff;">Yashal</span>
       </div>
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(200,160,255,0.1); padding-bottom: 0.5rem;">
-        <span style="color: rgba(200,180,240,0.5);">Design & Architecture</span>
-        <span style="color: #e3d2ff; font-weight: 400;">Yashal</span>
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
+        <span style="color:rgba(200,180,240,0.5);">Design & Architecture</span>
+        <span style="color:#e3d2ff;">Yashal</span>
       </div>
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(200,160,255,0.1); padding-bottom: 0.5rem;">
-        <span style="color: rgba(200,180,240,0.5);">Special Thanks</span>
-        <span style="color: #e3d2ff; font-weight: 400;">My parents, for the constant support</span>
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
+        <span style="color:rgba(200,180,240,0.5);">Special Thanks</span>
+        <span style="color:#e3d2ff;">My parents</span>
       </div>
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(200,160,255,0.1); padding-bottom: 0.5rem;">
-        <span style="color: rgba(200,180,240,0.5);">Honourable Mentions</span>
-        <span style="color: #e3d2ff; font-weight: 400;">Shail, Yuan</span>
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
+        <span style="color:rgba(200,180,240,0.5);">Honourable Mentions</span>
+        <span style="color:#e3d2ff;">Shail, Yuan</span>
       </div>
-      <div style="display: flex; justify-content: space-between; padding-bottom: 0.2rem;">
-        <span style="color: rgba(200,180,240,0.5);">Powered By</span>
-        <span style="color: #e3d2ff; font-weight: 400;">OpenRouter & Supabase</span>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:rgba(200,180,240,0.5);">Powered By</span>
+        <span style="color:#e3d2ff;">OpenRouter & Supabase</span>
       </div>
     </div>
-    <button class="modal-close" style="width: 100%; text-align: center; font-size: 0.9rem;" onclick="closeModal('credits-modal')">Close</button>
-  </div>
-</div>
-
-<!-- PRIVACY NOTICE MODAL -->
-<div class="modal-overlay" id="privacy-modal">
-  <div class="modal-box" style="max-width: 420px; text-align: left;">
-    <div class="modal-title" style="text-align: center; font-size: 1.5rem;">Privacy & Data</div>
-    <p style="font-size: 0.85rem; color: rgba(200,180,240,0.8); line-height: 1.6; margin-bottom: 1.25rem;">
-      Your inputs, thoughts, and attached photos are processed securely to generate your responses. If you choose to sign in, optional memory context is stored securely via Supabase to personalize your experience. 
-    </p>
-    <p style="font-size: 0.85rem; color: rgba(200,180,240,0.8); line-height: 1.6; margin-bottom: 1.5rem;">
-      Nothing you share is ever sold, publicly listed, or shared with third parties.
-    </p>
-    <button class="modal-close" style="width: 100%; text-align: center; font-size: 0.9rem;" onclick="closeModal('privacy-modal')">Got it</button>
+    <button class="modal-close" onclick="closeModal('credits-modal')">Close</button>
   </div>
 </div>
 
@@ -284,185 +231,256 @@
   let currentTheme = 'guest';
   let currentImageB64 = null;
   let currentImageType = null;
-  let lastActionType = null;
 
   const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
   let supabaseClient = null;
   let currentUser = null;
 
+  let activeConversationId = null;
+  let conversationMessages = [];
+
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     supabaseClient.auth.onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       updateAuthUI();
+      if (currentUser) {
+        loadUserConversations();
+        loadUserPreferences();
+      }
     });
   }
 
-  function playAmbientChime() {
-    if (navigator.vibrate) navigator.vibrate(25);
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.6);
-    } catch(e) {}
+  const GUEST_PROMPT = `You are BeautyBott by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Warm, direct, casual, and human.`;
+  const YUAN_PROMPT = `You are BeautyBott by Yashal — you talk like a boy deeply in love with his boyfriend. Warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('closed');
+    document.getElementById('main-content').classList.toggle('sidebar-open');
   }
 
-  async function saveInteractionToSupabase(promptInput, responseOutput) {
-    if (!currentUser || !supabaseClient) return;
-    try {
-      await supabaseClient.from('memories').insert([
-        {
-          user_id: currentUser.id,
-          prompt: promptInput || 'Affirmation Request',
-          response: responseOutput,
-          created_at: new Date().toISOString()
-        }
-      ]);
-    } catch (e) {
-      console.log('Memory save notice:', e);
-    }
-  }
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  function openAuthModal() { openModal('auth-modal'); }
 
   function updateAuthUI() {
-    const status = document.getElementById('user-status');
     const btn = document.getElementById('auth-toggle-btn');
     if (currentUser) {
-      status.textContent = `Logged in: ${currentUser.email}`;
       btn.textContent = 'Sign Out';
       btn.onclick = () => supabaseClient.auth.signOut();
     } else {
-      status.textContent = 'Guest Mode (Sign in for AI Memory)';
       btn.textContent = 'Sign In';
       btn.onclick = openAuthModal;
     }
   }
 
-  function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
-  function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
-
-  function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
-  function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-
   async function handleAuth() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    if (!email || !password) return alert('Please enter email and password');
+    if (!email || !password) return alert('Enter email and password');
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
-      const { data: signUpData, error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
+      const { error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
       if (signUpErr) alert(signUpErr.message);
-      else alert('Check your email to confirm your account!');
+      else alert('Check your email to confirm registration!');
     }
-    closeAuthModal();
+    closeModal('auth-modal');
   }
 
-  const GUEST_PROMPT = `You are BeautyBott by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Not an AI, not a therapist. Just someone real who cares.
+  // PREFERENCES
+  async function loadUserPreferences() {
+    if (!currentUser || !supabaseClient) return;
+    const { data } = await supabaseClient.from('user_preferences').select('*').eq('user_id', currentUser.id).single();
+    if (data) {
+      document.getElementById('pref-name').value = data.preferred_name || '';
+      document.getElementById('pref-instructions').value = data.custom_instructions || '';
+    }
+  }
 
-Your vibe:
-- Warm, casual, direct. Like texting a good friend.
-- Specific — respond to exactly what they said, not a generic version of it
-- Medium sentences. 6-10 lines max. Sometimes just fragments.
-- Never say "you are valid", "self-love", "embrace", "journey", or any therapy-speak
-- Never start with "oh" or "aw" or "I can see that"
-- Make them feel seen, not lectured
-- MAKE IT SOUND AS HUMAN AS POSSIBLE!
-- End with something that actually sticks with them`;
+  async function savePreferences() {
+    if (!currentUser || !supabaseClient) return alert('Please sign in first.');
+    const preferred_name = document.getElementById('pref-name').value;
+    const custom_instructions = document.getElementById('pref-instructions').value;
 
-  const YUAN_PROMPT = `You are BeautyBott by Yashal — you talk exactly like a boy who is completely, deeply in love with his boyfriend. Casual, specific, tender. Like real texts from someone who thinks about him all the time and notices everything about him.
+    await supabaseClient.from('user_preferences').upsert({
+      user_id: currentUser.id,
+      preferred_name,
+      custom_instructions,
+      updated_at: new Date().toISOString()
+    });
 
-Your style:
-- Short lines. About 6 lines minimum and 10 lines max.
-- Specific and surprising — mention small details like how his face looks, his energy, the way he carries himself
-- Casual but it hits deep — warm, direct, genuinely loving
-- Compare him to beautiful things — light, the sky, calm water, space, galaxies, stars — but always say he is MORE beautiful
-- Never generic. Never too fancy poetry. Real, tender, and specific.
-- 6-10 short lines. Not too long paragraphs.
-- Write like you're texting him at 2am and you mean every single word.
-- MAKE IT SOUND AS HUMAN AS POSSIBLE!
-- Always end EVERY response with exactly these 4 lines on their own, after everything else you say. Make sure what comes before flows into it naturally:
-"Eitherway,
-Just know,
-No matter how you look at the moment,
-You always completely drive me wild."`;
+    alert('Preferences saved!');
+    closeModal('prefs-modal');
+  }
 
-  function setupYuanMode() {
-    currentTheme = 'yuan';
-    document.body.classList.remove('theme-guest');
-    document.body.classList.add('theme-yuan');
-    document.getElementById('guest-header').style.display = 'none';
-    document.getElementById('yuan-header').style.display = 'block';
-    document.getElementById('text-label').textContent = "what's on your heart?";
-    document.getElementById('text-btn').textContent = 'tell me something beautiful';
-    document.getElementById('insecurity-input').placeholder = "i don't feel great about myself today... i feel like i'm not enough...";
-    document.getElementById('upload-circle').setAttribute('stroke', 'rgba(80,140,255,0.35)');
-    document.getElementById('upload-path').setAttribute('stroke', 'rgba(80,140,255,0.65)');
-    const petals = ['💙', '🩵', '✨', '💙', '🩵', '💫'];
-    for (let i = 0; i < 14; i++) {
-      const p = document.createElement('div');
-      p.className = 'petal';
-      p.textContent = petals[Math.floor(Math.random() * petals.length)];
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.fontSize = (0.7 + Math.random() * 0.9) + 'rem';
-      p.style.animationDuration = (10 + Math.random() * 14) + 's';
-      p.style.animationDelay = (Math.random() * 12) + 's';
-      document.body.appendChild(p);
+  // CONVERSATIONS
+  async function loadUserConversations() {
+    if (!currentUser || !supabaseClient) return;
+    const { data } = await supabaseClient.from('conversations').select('*').order('updated_at', { ascending: false });
+    const list = document.getElementById('convos-list');
+    list.innerHTML = '';
+
+    if (data) {
+      data.forEach(c => {
+        const item = document.createElement('div');
+        item.className = `convo-item ${c.id === activeConversationId ? 'active' : ''}`;
+        item.innerHTML = `
+          <span class="convo-title" onclick="selectConversation('${c.id}')">${c.title}</span>
+          <button class="delete-convo-btn" onclick="deleteConversation('${c.id}')">✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+  }
+
+  async function createNewChat() {
+    activeConversationId = null;
+    conversationMessages = [];
+    document.getElementById('chat-stream').innerHTML = `
+      <div class="chat-bubble assistant">
+        Started a new conversation! What would you like to discuss?
+      </div>
+    `;
+    if (currentUser) loadUserConversations();
+  }
+
+  async function selectConversation(id) {
+    activeConversationId = id;
+    loadUserConversations();
+    const { data } = await supabaseClient.from('messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true });
+    
+    const stream = document.getElementById('chat-stream');
+    stream.innerHTML = '';
+    conversationMessages = [];
+
+    if (data) {
+      data.forEach(m => {
+        conversationMessages.push({ role: m.sender, content: m.content });
+        appendBubble(m.sender, m.content);
+      });
+    }
+  }
+
+  async function deleteConversation(id) {
+    if (!supabaseClient) return;
+    await supabaseClient.from('conversations').delete().eq('id', id);
+    if (activeConversationId === id) createNewChat();
+    else loadUserConversations();
+  }
+
+  function appendBubble(sender, text) {
+    const stream = document.getElementById('chat-stream');
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${sender}`;
+    bubble.textContent = text;
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const text = input.value.trim();
+
+    if (currentTheme === 'guest' && text === YUAN_PW) {
+      setupYuanMode();
+      input.value = '';
+      return;
+    }
+
+    if (!text && !currentImageB64) return;
+
+    input.value = '';
+    appendBubble('user', text || '[Photo attached]');
+
+    conversationMessages.push({ role: 'user', content: text });
+
+    // Handle Supabase thread persistence
+    if (currentUser && supabaseClient) {
+      if (!activeConversationId) {
+        const titleSnippet = text.slice(0, 28) || 'New Conversation';
+        const { data } = await supabaseClient.from('conversations').insert([
+          { user_id: currentUser.id, title: titleSnippet }
+        ]).select().single();
+        if (data) activeConversationId = data.id;
+      }
+
+      if (activeConversationId) {
+        await supabaseClient.from('messages').insert([
+          { conversation_id: activeConversationId, sender: 'user', content: text }
+        ]);
+      }
+    }
+
+    // Call API
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: conversationMessages,
+          userId: currentUser?.id,
+          systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      const reply = data.content;
+      appendBubble('assistant', reply);
+      conversationMessages.push({ role: 'assistant', content: reply });
+
+      if (currentUser && supabaseClient && activeConversationId) {
+        await supabaseClient.from('messages').insert([
+          { conversation_id: activeConversationId, sender: 'assistant', content: reply }
+        ]);
+        loadUserConversations();
+      }
+
+      removeImage();
+    } catch (err) {
+      appendBubble('assistant', 'Sorry, I hit a snag connecting. Please try again!');
+    }
+  }
+
+  async function generateAffirmations() {
+    appendBubble('user', '✨ Requesting 3 Daily Affirmations');
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'Give me 3 short, deeply personal daily affirmations right now.' }],
+          userId: currentUser?.id,
+          systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
+        })
+      });
+
+      const data = await res.json();
+      appendBubble('assistant', data.content);
+    } catch (e) {
+      appendBubble('assistant', 'Could not generate affirmations right now.');
     }
   }
 
   function handleFile(input) {
     const file = input.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        currentImageType = 'image/jpeg';
-        currentImageB64 = dataUrl.split(',')[1];
-
-        const preview = document.getElementById('preview-img');
-        preview.src = dataUrl;
-        document.getElementById('preview-container').style.display = 'flex';
-        document.getElementById('upload-zone').style.display = 'none';
-      };
-      img.src = e.target.result;
+      currentImageType = 'image/jpeg';
+      currentImageB64 = e.target.result.split(',')[1];
+      document.getElementById('preview-thumb').src = e.target.result;
+      document.getElementById('preview-bar').style.display = 'flex';
     };
     reader.readAsDataURL(file);
   }
@@ -470,141 +488,21 @@ You always completely drive me wild."`;
   function removeImage() {
     currentImageB64 = null;
     currentImageType = null;
-    document.getElementById('preview-img').src = '';
-    document.getElementById('preview-container').style.display = 'none';
-    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('preview-bar').style.display = 'none';
     document.getElementById('file-input').value = '';
   }
 
-  function showLoading() {
-    playAmbientChime();
-    document.getElementById('response-card').classList.add('visible');
-    document.getElementById('response-text').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-    document.getElementById('error-banner').style.display = 'none';
-  }
-
-  function hideResponse() { document.getElementById('response-card').classList.remove('visible'); }
-
-  function resetResponse() {
-    hideResponse();
-    removeImage();
-    document.getElementById('insecurity-input').value = '';
-    document.getElementById('error-banner').style.display = 'none';
-  }
-
-  function getPrompt() {
-    return currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT;
-  }
-
-  async function generateAffirmations() {
-    lastActionType = 'affirmations';
-    showLoading();
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parts: [{ text: getPrompt() }],
-          userId: currentUser?.id,
-          type: 'affirmations'
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
-      document.getElementById('response-text').textContent = data.content;
-      document.getElementById('error-banner').style.display = 'none';
-      saveInteractionToSupabase('Daily Affirmations', data.content);
-    } catch (err) {
-      document.getElementById('response-card').classList.remove('visible');
-      document.getElementById('error-banner').style.display = 'block';
-    }
-  }
-
-  async function generateResponse() {
-    const inputVal = document.getElementById('insecurity-input').value.trim();
-
-    if (currentTheme === 'guest' && inputVal === YUAN_PW) {
-      setupYuanMode();
-      document.getElementById('insecurity-input').value = '';
-      return;
-    }
-
-    if (!inputVal && !currentImageB64) return;
-    
-    lastActionType = 'response';
-    document.getElementById('error-banner').style.display = 'none';
-    showLoading();
-
-    try {
-      let parts = [{ text: getPrompt() }];
-      if (currentImageB64) {
-        parts.push({ inlineData: { mimeType: currentImageType, data: currentImageB64 } });
-      }
-      let contextText = inputVal ? `Someone shared this: "${inputVal}"\n\nRespond to them.` : 'Someone shared a photo of themselves. Look at them and say something real and beautiful about what you see.';
-      parts.push({ text: contextText });
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parts, userId: currentUser?.id })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'error');
-      document.getElementById('response-text').textContent = data.content;
-      document.getElementById('error-banner').style.display = 'none';
-      saveInteractionToSupabase(inputVal, data.content);
-    } catch (err) {
-      document.getElementById('response-card').classList.remove('visible');
-      document.getElementById('error-banner').style.display = 'block';
-    }
-  }
-
-  function retryLastAction() {
-    if (lastActionType === 'affirmations') {
-      generateAffirmations();
-    } else {
-      generateResponse();
-    }
-  }
-
-  function copyResponse() {
-    const text = document.getElementById('response-text').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const copyBtn = document.getElementById('copy-btn');
-      copyBtn.textContent = '✓ Copied!';
-      setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
+  function setupYuanMode() {
+    currentTheme = 'yuan';
+    document.body.classList.remove('theme-guest');
+    document.body.classList.add('theme-yuan');
+    document.getElementById('app-heading').textContent = 'for you, always 💙';
   }
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then((reg) => {
-        console.log('SW registered!', reg);
-      }).catch((err) => {
-        console.log('SW registration failed:', err);
-      });
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
-  }
-
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById('install-app-btn');
-    if (installBtn) installBtn.style.display = 'inline-block';
-  });
-
-  async function installApp() {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      document.getElementById('install-app-btn').style.display = 'none';
-    }
-    deferredPrompt = null;
   }
 </script>
 </body>
