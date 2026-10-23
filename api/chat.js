@@ -10,12 +10,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { parts, userId, type } = req.body;
+    const { messages, userId, systemPrompt, type } = req.body;
     let memoryContext = "";
+    let userPrefContext = "";
 
-    // 1. Fetch past learned insecurities if user is authenticated
+    // 1. Fetch user memories and user preferences if logged in
     if (supabase && userId) {
       try {
+        // Fetch memories
         const { data: memories } = await supabase
           .from('memories')
           .select('content')
@@ -25,62 +27,46 @@ module.exports = async function handler(req, res) {
 
         if (memories && memories.length > 0) {
           const pastInsecurities = memories.map(m => m.content).join("; ");
-          memoryContext = `\n\n[USER MEMORY: The user has previously struggled with or mentioned: ${pastInsecurities}. Keep this in mind to make your response feel deeply personal and continuous without explicitly listing their past struggles.]`;
+          memoryContext = `\n[USER MEMORY: The user has previously mentioned or struggled with: ${pastInsecurities}. Keep this in mind seamlessly without explicitly reciting list format.]`;
+        }
+
+        // Fetch custom user preferences
+        const { data: prefs } = await supabase
+          .from('user_preferences')
+          .select('preferred_name, communication_style, custom_instructions')
+          .eq('user_id', userId)
+          .single();
+
+        if (prefs) {
+          if (prefs.preferred_name) userPrefContext += `\nThe user prefers to be called "${prefs.preferred_name}".`;
+          if (prefs.communication_style) userPrefContext += `\nPreferred style: ${prefs.communication_style}.`;
+          if (prefs.custom_instructions) userPrefContext += `\nCustom instructions: ${prefs.custom_instructions}.`;
         }
       } catch (dbErr) {
         console.warn("Supabase fetch error:", dbErr);
       }
     }
 
-    // 2. Parse parts safely for OpenRouter
-    let userContentPayload = [];
-    let textSummaryForMemory = "";
-
-    if (Array.isArray(parts)) {
-      for (const p of parts) {
-        if (typeof p === 'string') {
-          userContentPayload.push({ type: 'text', text: p });
-          textSummaryForMemory += p + " ";
-        } else if (p && typeof p === 'object') {
-          if (p.text) {
-            let t = p.text;
-            if (memoryContext && t.includes('Someone shared this')) {
-              t += memoryContext;
-            }
-            userContentPayload.push({ type: 'text', text: t });
-            textSummaryForMemory += t + " ";
-          } else if (p.inlineData) {
-            const mime = p.inlineData.mimeType || 'image/jpeg';
-            const base64 = p.inlineData.data;
-            userContentPayload.push({
-              type: 'image_url',
-              image_url: {
-                url: `data:${mime};base64,${base64}`
-              }
-            });
-            textSummaryForMemory += "[Attached Photo] ";
-          }
-        }
-      }
-    } else if (typeof parts === 'string') {
-      let finalTxt = parts;
-      if (memoryContext) finalTxt += memoryContext;
-      userContentPayload = finalTxt;
-      textSummaryForMemory = finalTxt;
-    }
-
-    if (type === 'affirmations') {
-      const affirmationPrompt = "\n\nBased on what you know about me and my past insecurities, give me exactly 3 short, deeply personal affirmations to repeat to myself right now. Number them 1, 2, and 3. Make them feel like a close friend talking.";
-      if (Array.isArray(userContentPayload)) {
-        userContentPayload.push({ type: 'text', text: affirmationPrompt });
-      } else {
-        userContentPayload += affirmationPrompt;
-      }
-    }
-
     const openRouterKey = process.env.OPENROUTER_API_KEY;
     if (!openRouterKey) {
       return res.status(500).json({ error: 'Server configuration error: missing OPENROUTER_API_KEY' });
+    }
+
+    // Build complete system instruction
+    let fullSystemInstruction = systemPrompt || 'You are BeautyBott by Yashal, a deeply empathetic, uplifting, and warm personal assistant.';
+    if (userPrefContext) fullSystemInstruction += userPrefContext;
+    if (memoryContext) fullSystemInstruction += memoryContext;
+
+    // Build payload messages for OpenRouter
+    let formattedMessages = [
+      { role: 'system', content: fullSystemInstruction }
+    ];
+
+    if (Array.isArray(messages)) {
+      formattedMessages = formattedMessages.concat(messages);
+    } else if (req.body.parts) {
+      // Fallback compatibility for single-turn requests
+      formattedMessages.push({ role: 'user', content: req.body.parts });
     }
 
     const openRouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -94,10 +80,7 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         max_tokens: 1000,
-        messages: [
-          { role: 'system', content: 'You are BeautyBott by Yashal, a deeply empathetic, uplifting, and warm personal assistant.' },
-          { role: 'user', content: userContentPayload }
-        ]
+        messages: formattedMessages
       })
     });
 
@@ -108,18 +91,6 @@ module.exports = async function handler(req, res) {
     }
 
     const reply = data.choices?.[0]?.message?.content || "You are wonderful just as you are.";
-
-    if (supabase && userId && type !== 'affirmations' && textSummaryForMemory) {
-      const cleanText = textSummaryForMemory.replace(/\[USER MEMORY:[\s\S]*?\]/g, '').replace(/Someone shared this: "|"\n\nRespond to them./g, '').trim();
-      if (cleanText.length > 3) {
-        supabase.from('memories').insert({
-          user_id: userId,
-          content: cleanText
-        }).then(({ error }) => {
-          if (error) console.error("Failed to insert memory:", error);
-        });
-      }
-    }
 
     return res.status(200).json({ content: reply });
   } catch (err) {
