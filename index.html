@@ -126,7 +126,6 @@
     .theme-guest .response-text { font-family: 'Playfair Display', serif; font-size: 1.08rem; color: #ede0ff; }
     .theme-yuan .response-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: #c8dcff; line-height: 2.1; }
 
-    /* ACTION BUTTONS UNDER RESPONSE CARD */
     .card-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
     .response-action-btn { padding: 0.45rem 1.25rem; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; transition: all 0.3s; border-radius: 50px; }
     .theme-guest .response-action-btn { border: 0.5px solid rgba(200,160,255,0.22); color: rgba(200,160,255,0.6); }
@@ -142,13 +141,11 @@
     .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
 
-    /* ERROR BANNER WITH AUTO-RETRY */
     .error-banner { margin-top: 1.5rem; padding: 1.25rem; border-radius: 16px; background: rgba(255,80,80,0.08); border: 1px solid rgba(255,100,100,0.25); text-align: center; display: none; }
     .error-text { font-size: 0.85rem; color: rgba(255,180,180,0.9); margin-bottom: 0.75rem; }
     .retry-btn { padding: 0.4rem 1.2rem; background: rgba(255,100,100,0.2); border: 1px solid rgba(255,100,100,0.4); color: #ffdede; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
     .retry-btn:hover { background: rgba(255,100,100,0.35); }
 
-    /* AUTH MODAL & GENERAL MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
     .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; color: #f0eaf8; }
     .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; color: #e3d2ff; }
@@ -208,7 +205,6 @@
     <button class="conjure-btn" id="text-btn" onclick="generateResponse()">conjure something beautiful for me</button>
   </div>
 
-  <!-- ERROR BANNER WITH AUTO-RETRY -->
   <div class="error-banner" id="error-banner">
     <div class="error-text" id="error-text">Network busy or rate limit hit. Let's try that again.</div>
     <button class="retry-btn" onclick="retryLastAction()">🔄 Try Again</button>
@@ -287,7 +283,7 @@
   let currentTheme = 'guest';
   let currentImageB64 = null;
   let currentImageType = null;
-  let lastActionType = null; // Used for auto-retry
+  let lastActionType = null;
 
   const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
@@ -300,6 +296,44 @@
       currentUser = session?.user || null;
       updateAuthUI();
     });
+  }
+
+  // Audio Context & Haptic Feedback synthesis
+  function playAmbientChime() {
+    if (navigator.vibrate) navigator.vibrate(25);
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5 note
+      osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.3); // E5 note
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch(e) {}
+  }
+
+  // Persist interaction history to Supabase memory
+  async function saveInteractionToSupabase(promptInput, responseOutput) {
+    if (!currentUser || !supabaseClient) return;
+    try {
+      await supabaseClient.from('memories').insert([
+        {
+          user_id: currentUser.id,
+          prompt: promptInput || 'Affirmation Request',
+          response: responseOutput,
+          created_at: new Date().toISOString()
+        }
+      ]);
+    } catch (e) {
+      console.log('Memory save notice:', e);
+    }
   }
 
   function updateAuthUI() {
@@ -444,6 +478,7 @@ You always completely drive me wild."`;
   }
 
   function showLoading() {
+    playAmbientChime();
     document.getElementById('response-card').classList.add('visible');
     document.getElementById('response-text').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
     document.getElementById('error-banner').style.display = 'none';
@@ -479,6 +514,7 @@ You always completely drive me wild."`;
       if (!res.ok) throw new Error(data.error || 'Failed');
       document.getElementById('response-text').textContent = data.content;
       document.getElementById('error-banner').style.display = 'none';
+      saveInteractionToSupabase('Daily Affirmations', data.content);
     } catch (err) {
       document.getElementById('response-card').classList.remove('visible');
       document.getElementById('error-banner').style.display = 'block';
@@ -518,6 +554,7 @@ You always completely drive me wild."`;
       if (!res.ok) throw new Error(data.error || 'error');
       document.getElementById('response-text').textContent = data.content;
       document.getElementById('error-banner').style.display = 'none';
+      saveInteractionToSupabase(inputVal, data.content);
     } catch (err) {
       document.getElementById('response-card').classList.remove('visible');
       document.getElementById('error-banner').style.display = 'block';
@@ -532,7 +569,6 @@ You always completely drive me wild."`;
     }
   }
 
-  // Copy to clipboard helper
   function copyResponse() {
     const text = document.getElementById('response-text').textContent;
     navigator.clipboard.writeText(text).then(() => {
