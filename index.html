@@ -77,4 +77,462 @@
 
     .bubble-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
     .speech-btn { background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; font-size: 0.75rem; transition: color 0.2s; }
-    .speech-btn:hover { color: rgba(200,18
+    .speech-btn:hover { color: rgba(200,180,240,0.9); }
+
+    .input-wrapper { max-width: 760px; width: 100%; margin: 0 auto; padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .input-box { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.2); border-radius: 24px; padding: 0.5rem 0.75rem 0.5rem 1.25rem; align-items: flex-end; }
+    textarea { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; resize: none; max-height: 120px; line-height: 1.5; padding: 0.4rem 0; }
+    textarea::placeholder { color: rgba(200,180,240,0.3); }
+    .send-btn { background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .attach-btn { background: transparent; border: none; color: rgba(200,180,240,0.6); cursor: pointer; padding: 0.4rem; font-size: 1.1rem; }
+
+    .preview-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: rgba(200,180,240,0.7); display: none; }
+    .preview-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+    .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2rem; border-radius: 24px; width: 90%; max-width: 440px; color: #f0eaf8; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 1rem; text-align: center; color: #e3d2ff; }
+    .modal-input { width: 100%; padding: 0.75rem 1rem; margin-bottom: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,160,255,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 0.9rem; }
+    .modal-submit { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
+    .modal-close { margin-top: 0.75rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; width: 100%; text-align: center; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 240px; }
+      .main-content.sidebar-open { margin-left: 0; }
+    }
+  </style>
+</head>
+<body class="theme-guest">
+
+<div class="app-container">
+  <div class="sidebar closed" id="sidebar">
+    <div class="sidebar-header">
+      <span style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #e3d2ff;">Chat History</span>
+      <button onclick="toggleSidebar()" style="background:transparent; border:none; color:#a080d0; cursor:pointer;">✕</button>
+    </div>
+    <div style="padding: 0 0.75rem;">
+      <button class="new-chat-btn" onclick="createNewChat()">+ New Conversation</button>
+    </div>
+    <div class="convos-list" id="convos-list"></div>
+  </div>
+
+  <div class="main-content" id="main-content">
+    <div class="top-nav">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button class="toggle-sidebar-btn" onclick="toggleSidebar()">☰ Threads</button>
+        <span style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #e3d2ff;" id="app-heading">BeautyBott</span>
+      </div>
+      <div class="top-actions">
+        <button class="nav-btn" onclick="exportChatTranscript()">📥 Export</button>
+        <button class="nav-btn" onclick="generateAffirmations()">✨ Affirmations</button>
+        <button class="nav-btn" onclick="openModal('prefs-modal')">⚙️ Preferences</button>
+        <button class="nav-btn" onclick="openModal('credits-modal')">Credits</button>
+        <a class="nav-btn" href="mailto:beautybott2025@gmail.com?subject=BeautyBott%20Feedback" style="text-decoration:none;">Feedback</a>
+        <button class="nav-btn" id="auth-toggle-btn" onclick="openAuthModal()">Sign In</button>
+      </div>
+    </div>
+
+    <div class="chat-stream" id="chat-stream">
+      <div class="chat-bubble assistant">
+        Hello! I'm BeautyBott by Yashal. How are you feeling today? Share whatever is on your mind, or ask for something beautiful.
+        <div class="bubble-actions">
+          <button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-wrapper">
+      <div class="preview-bar" id="preview-bar">
+        <img class="preview-thumb" id="preview-thumb" />
+        <span>Photo attached</span>
+        <button onclick="removeImage()" style="background:transparent; border:none; color:#ff8080; cursor:pointer;">Remove</button>
+      </div>
+
+      <div class="input-box">
+        <input type="file" accept="image/*" id="file-input" style="display:none;" onchange="handleFile(this)" />
+        <button class="attach-btn" onclick="document.getElementById('file-input').click()">📷</button>
+        <textarea id="user-input" rows="1" placeholder="Tell me what's on your heart..." onkeydown="handleKeyDown(event)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">➔</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PREFERENCES MODAL -->
+<div class="modal-overlay" id="prefs-modal">
+  <div class="modal-box">
+    <div class="modal-title">Account Preferences</div>
+    
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Preferred Name</label>
+    <input type="text" id="pref-name" class="modal-input" placeholder="How should BeautyBott call you?" />
+
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Voice Reader Persona</label>
+    <select id="pref-voice" class="modal-input" style="background:#201830; color:#fff;">
+      <option value="boy">Boy Tone (Deeper Pitch ~138 Hz)</option>
+      <option value="girl">Girl Tone</option>
+    </select>
+
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Custom Instructions</label>
+    <textarea id="pref-instructions" class="modal-input" rows="3" placeholder="Any specific tone or reminders for your AI?"></textarea>
+
+    <button class="modal-submit" onclick="savePreferences()">Save Preferences</button>
+    <button class="modal-close" onclick="closeModal('prefs-modal')">Close</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box">
+    <div class="modal-title">BeautyBott Account</div>
+    <input type="email" id="auth-email" class="modal-input" placeholder="Email address" />
+    <input type="password" id="auth-password" class="modal-input" placeholder="Password" />
+    <button class="modal-submit" onclick="handleAuth()">Continue</button>
+    <button class="modal-close" onclick="closeModal('auth-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- CREDITS MODAL -->
+<div class="modal-overlay" id="credits-modal">
+  <div class="modal-box" style="max-width: 440px; text-align: left;">
+    <div class="modal-title">BeautyBott by Yashal</div>
+    <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.25rem;">Built with care, dedication, and late nights.</div>
+    <button class="modal-close" onclick="closeModal('credits-modal')">Close</button>
+  </div>
+</div>
+
+<script>
+  const YUAN_PW = 'imlkg6';
+  let currentTheme = 'guest';
+  let currentImageB64 = null;
+  let currentImageType = null;
+  let selectedVoiceGender = localStorage.getItem('bb_voice') || 'boy';
+
+  const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
+  let supabaseClient = null;
+  let currentUser = null;
+
+  let activeConversationId = null;
+  let conversationMessages = [];
+
+  if (window.supabase) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
+      updateAuthUI();
+      if (currentUser) {
+        loadUserConversations();
+        loadUserPreferences();
+      }
+    });
+  }
+
+  document.getElementById('pref-voice').value = selectedVoiceGender;
+
+  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human.`;
+  const YUAN_PROMPT = `You are BeautyBott by Yashal — warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('closed');
+    document.getElementById('main-content').classList.toggle('sidebar-open');
+  }
+
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  function openAuthModal() { openModal('auth-modal'); }
+
+  function updateAuthUI() {
+    const btn = document.getElementById('auth-toggle-btn');
+    if (currentUser) {
+      btn.textContent = 'Sign Out';
+      btn.onclick = () => supabaseClient.auth.signOut();
+    } else {
+      btn.textContent = 'Sign In';
+      btn.onclick = openAuthModal;
+    }
+  }
+
+  async function handleAuth() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) return alert('Enter email and password');
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      const { error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
+      if (signUpErr) alert(signUpErr.message);
+      else alert('Check email to confirm!');
+    }
+    closeModal('auth-modal');
+  }
+
+  async function loadUserPreferences() {
+    if (!currentUser || !supabaseClient) return;
+    const { data } = await supabaseClient.from('user_preferences').select('*').eq('user_id', currentUser.id).single();
+    if (data) {
+      document.getElementById('pref-name').value = data.preferred_name || '';
+      document.getElementById('pref-instructions').value = data.custom_instructions || '';
+    }
+  }
+
+  async function savePreferences() {
+    selectedVoiceGender = document.getElementById('pref-voice').value;
+    localStorage.setItem('bb_voice', selectedVoiceGender);
+
+    if (currentUser && supabaseClient) {
+      const preferred_name = document.getElementById('pref-name').value;
+      const custom_instructions = document.getElementById('pref-instructions').value;
+      await supabaseClient.from('user_preferences').upsert({
+        user_id: currentUser.id,
+        preferred_name,
+        custom_instructions,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    alert('Preferences saved!');
+    closeModal('prefs-modal');
+  }
+
+  function speakText(btn) {
+    if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported in this browser.');
+    window.speechSynthesis.cancel();
+
+    const parentBubble = btn.closest('.chat-bubble');
+    const clone = parentBubble.cloneNode(true);
+    const actions = clone.querySelector('.bubble-actions');
+    if (actions) actions.remove();
+    const textToSpeak = clone.textContent.trim();
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const voices = window.speechSynthesis.getVoices();
+
+    if (selectedVoiceGender === 'girl') {
+      utterance.pitch = 1.35;
+      utterance.rate = 1.02;
+      const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira'));
+      if (femaleVoice) utterance.voice = femaleVoice;
+    } else {
+      // BOY VOICE TUNING (Lower Pitch: 0.82)
+      utterance.pitch = 0.82;
+      utterance.rate = 0.95;
+      const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('David') || v.name.includes('Oliver'));
+      if (maleVoice) utterance.voice = maleVoice;
+    }
+
+    btn.textContent = '🔊 Reading...';
+    utterance.onend = () => { btn.textContent = '🔊 Read Aloud'; };
+    utterance.onerror = () => { btn.textContent = '🔊 Read Aloud'; };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  async function loadUserConversations() {
+    if (!currentUser || !supabaseClient) return;
+    const { data } = await supabaseClient.from('conversations').select('*').order('updated_at', { ascending: false });
+    const list = document.getElementById('convos-list');
+    list.innerHTML = '';
+    if (data) {
+      data.forEach(c => {
+        const item = document.createElement('div');
+        item.className = `convo-item ${c.id === activeConversationId ? 'active' : ''}`;
+        item.innerHTML = `
+          <span class="convo-title" onclick="selectConversation('${c.id}')">${c.title}</span>
+          <button class="delete-convo-btn" onclick="deleteConversation('${c.id}')">✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+  }
+
+  async function createNewChat() {
+    activeConversationId = null;
+    conversationMessages = [];
+    document.getElementById('chat-stream').innerHTML = `
+      <div class="chat-bubble assistant">
+        Started a new conversation! What would you like to discuss?
+        <div class="bubble-actions"><button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button></div>
+      </div>
+    `;
+    if (currentUser) loadUserConversations();
+  }
+
+  async function selectConversation(id) {
+    activeConversationId = id;
+    loadUserConversations();
+    const { data } = await supabaseClient.from('messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true });
+    const stream = document.getElementById('chat-stream');
+    stream.innerHTML = '';
+    conversationMessages = [];
+    if (data) {
+      data.forEach(m => {
+        conversationMessages.push({ role: m.sender, content: m.content });
+        appendBubble(m.sender, m.content);
+      });
+    }
+  }
+
+  async function deleteConversation(id) {
+    if (!supabaseClient) return;
+    await supabaseClient.from('conversations').delete().eq('id', id);
+    if (activeConversationId === id) createNewChat();
+    else loadUserConversations();
+  }
+
+  function appendBubble(sender, text) {
+    const stream = document.getElementById('chat-stream');
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${sender}`;
+    bubble.textContent = text;
+
+    if (sender === 'assistant') {
+      const actions = document.createElement('div');
+      actions.className = 'bubble-actions';
+      actions.innerHTML = `<button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>`;
+      bubble.appendChild(actions);
+    }
+
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  function exportChatTranscript() {
+    if (conversationMessages.length === 0) return alert('No conversation to export.');
+    let markdownContent = `# BeautyBott Conversation Transcript\n\n`;
+    conversationMessages.forEach(m => {
+      const roleName = m.role === 'user' ? 'You' : 'BeautyBott';
+      markdownContent += `### **${roleName}**\n${m.content}\n\n---\n\n`;
+    });
+    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BeautyBott-Chat-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const text = input.value.trim();
+    if (currentTheme === 'guest' && text === YUAN_PW) {
+      setupYuanMode();
+      input.value = '';
+      return;
+    }
+    if (!text && !currentImageB64) return;
+
+    input.value = '';
+    appendBubble('user', text || '[Photo attached]');
+    conversationMessages.push({ role: 'user', content: text });
+
+    if (currentUser && supabaseClient) {
+      if (!activeConversationId) {
+        let smartTitle = 'New Conversation';
+        try {
+          const titleRes = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: [{ content: text }], type: 'generate-title' })
+          });
+          const titleData = await titleRes.json();
+          if (titleData.title) smartTitle = titleData.title;
+        } catch(e) {}
+
+        const { data } = await supabaseClient.from('conversations').insert([{ user_id: currentUser.id, title: smartTitle }]).select().single();
+        if (data) activeConversationId = data.id;
+      }
+
+      if (activeConversationId) {
+        await supabaseClient.from('messages').insert([{ conversation_id: activeConversationId, sender: 'user', content: text }]);
+      }
+    }
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: conversationMessages,
+          userId: currentUser?.id,
+          systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      const reply = data.content;
+      appendBubble('assistant', reply);
+      conversationMessages.push({ role: 'assistant', content: reply });
+
+      if (currentUser && supabaseClient && activeConversationId) {
+        await supabaseClient.from('messages').insert([{ conversation_id: activeConversationId, sender: 'assistant', content: reply }]);
+        loadUserConversations();
+      }
+      removeImage();
+    } catch (err) {
+      appendBubble('assistant', 'Sorry, I hit a snag connecting. Please try again!');
+    }
+  }
+
+  async function generateAffirmations() {
+    appendBubble('user', '✨ Requesting 3 Daily Affirmations');
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'Give me 3 short, deeply personal daily affirmations right now.' }],
+          userId: currentUser?.id,
+          systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
+        })
+      });
+      const data = await res.json();
+      appendBubble('assistant', data.content);
+    } catch (e) {
+      appendBubble('assistant', 'Could not generate affirmations right now.');
+    }
+  }
+
+  function handleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentImageType = 'image/jpeg';
+      currentImageB64 = e.target.result.split(',')[1];
+      document.getElementById('preview-thumb').src = e.target.result;
+      document.getElementById('preview-bar').style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    currentImageB64 = null;
+    currentImageType = null;
+    document.getElementById('preview-bar').style.display = 'none';
+    document.getElementById('file-input').value = '';
+  }
+
+  function setupYuanMode() {
+    currentTheme = 'yuan';
+    document.body.classList.remove('theme-guest');
+    document.body.classList.add('theme-yuan');
+    document.getElementById('app-heading').textContent = 'for you, always 💙';
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
