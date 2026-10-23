@@ -96,6 +96,14 @@
     .modal-submit { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
     .modal-close { margin-top: 0.75rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; width: 100%; text-align: center; }
 
+    /* Custom Voice Range Controls */
+    .pitch-controls-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.15); padding: 1rem; border-radius: 16px; margin-bottom: 1rem; }
+    .pitch-slider-wrapper { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+    .pitch-slider { flex: 1; accent-color: #8c50f0; cursor: pointer; }
+    .pitch-val-tag { font-size: 0.85rem; color: #e3d2ff; font-weight: bold; width: 45px; text-align: right; }
+    .preview-btn { background: rgba(140,80,240,0.2); border: 1px solid rgba(180,130,255,0.3); color: #e3d2ff; padding: 0.4rem 0.8rem; border-radius: 10px; cursor: pointer; font-size: 0.8rem; margin-top: 0.6rem; width: 100%; transition: all 0.2s; }
+    .preview-btn:hover { background: rgba(140,80,240,0.4); }
+
     @media (max-width: 768px) {
       .sidebar { width: 240px; }
       .main-content.sidebar-open { margin-left: 0; }
@@ -158,7 +166,7 @@
   </div>
 </div>
 
-<!-- PREFERENCES MODAL -->
+<!-- PREFERENCES MODAL WITH CUSTOM PITCH SLIDER & PREVIEW -->
 <div class="modal-overlay" id="prefs-modal">
   <div class="modal-box">
     <div class="modal-title">Account Preferences</div>
@@ -167,10 +175,25 @@
     <input type="text" id="pref-name" class="modal-input" placeholder="How should BeautyBott call you?" />
 
     <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Voice Reader Persona</label>
-    <select id="pref-voice" class="modal-input" style="background:#201830; color:#fff;">
-      <option value="boy">Boy Tone (Deeper Pitch ~138 Hz)</option>
+    <select id="pref-voice" class="modal-input" style="background:#201830; color:#fff;" onchange="handleVoicePresetChange()">
+      <option value="boy">Boy Tone (Default ~138 Hz)</option>
       <option value="girl">Girl Tone</option>
+      <option value="custom">Custom Range</option>
     </select>
+
+    <!-- PITCH RANGE CONTROLLER -->
+    <div class="pitch-controls-box">
+      <label style="font-size:0.8rem; color:rgba(200,180,240,0.7); display:flex; justify-content:space-between;">
+        <span>Custom Pitch Range</span>
+        <span class="pitch-val-tag" id="pitch-val-display">0.82</span>
+      </label>
+      <div class="pitch-slider-wrapper">
+        <span style="font-size:0.75rem; color:rgba(200,180,240,0.5);">Deeper</span>
+        <input type="range" id="pitch-slider" class="pitch-slider" min="0.5" max="1.5" step="0.02" value="0.82" oninput="updatePitchDisplay(this.value)" />
+        <span style="font-size:0.75rem; color:rgba(200,180,240,0.5);">Higher</span>
+      </div>
+      <button class="preview-btn" onclick="previewVoiceSetting()">▶️ Preview Voice Pitch</button>
+    </div>
 
     <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Custom Instructions</label>
     <textarea id="pref-instructions" class="modal-input" rows="3" placeholder="Any specific tone or reminders for your AI?"></textarea>
@@ -180,7 +203,7 @@
   </div>
 </div>
 
-<!-- AUTH MODAL -->
+<!-- AUTH & CREDITS MODALS -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal-box">
     <div class="modal-title">BeautyBott Account</div>
@@ -191,7 +214,6 @@
   </div>
 </div>
 
-<!-- CREDITS MODAL -->
 <div class="modal-overlay" id="credits-modal">
   <div class="modal-box" style="max-width: 440px; text-align: left;">
     <div class="modal-title">BeautyBott by Yashal</div>
@@ -205,7 +227,9 @@
   let currentTheme = 'guest';
   let currentImageB64 = null;
   let currentImageType = null;
+  
   let selectedVoiceGender = localStorage.getItem('bb_voice') || 'boy';
+  let customPitchValue = parseFloat(localStorage.getItem('bb_pitch')) || 0.82;
 
   const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
@@ -227,7 +251,10 @@
     });
   }
 
+  // Init Voice Preference Controls
   document.getElementById('pref-voice').value = selectedVoiceGender;
+  document.getElementById('pitch-slider').value = customPitchValue;
+  document.getElementById('pitch-val-display').textContent = parseFloat(customPitchValue).toFixed(2);
 
   const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human.`;
   const YUAN_PROMPT = `You are BeautyBott by Yashal — warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
@@ -265,6 +292,53 @@
     closeModal('auth-modal');
   }
 
+  function updatePitchDisplay(val) {
+    document.getElementById('pitch-val-display').textContent = parseFloat(val).toFixed(2);
+  }
+
+  function handleVoicePresetChange() {
+    const preset = document.getElementById('pref-voice').value;
+    if (preset === 'boy') {
+      document.getElementById('pitch-slider').value = 0.82;
+      updatePitchDisplay(0.82);
+    } else if (preset === 'girl') {
+      document.getElementById('pitch-slider').value = 1.35;
+      updatePitchDisplay(1.35);
+    }
+  }
+
+  function getBestVoice(gender, voices) {
+    // Priority 1: Natural/Neural Online Voices (Microsoft Guy/Ryan/Online or Google)
+    if (gender === 'girl') {
+      return voices.find(v => v.name.includes('Natural') && (v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Female'))) ||
+             voices.find(v => v.name.includes('Google UK English Female')) ||
+             voices.find(v => v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Female'));
+    } else {
+      return voices.find(v => v.name.includes('Natural') && (v.name.includes('Guy') || v.name.includes('Ryan') || v.name.includes('Male'))) ||
+             voices.find(v => v.name.includes('Google UK English Male')) ||
+             voices.find(v => v.name.includes('Daniel') || v.name.includes('Oliver') || v.name.includes('Alex') || v.name.includes('Male'));
+    }
+  }
+
+  function previewVoiceSetting() {
+    if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported.');
+    window.speechSynthesis.cancel();
+
+    const pitchVal = parseFloat(document.getElementById('pitch-slider').value);
+    const genderPreset = document.getElementById('pref-voice').value;
+    const sampleText = "Hello! This is a preview of your custom voice setting for BeautyBott.";
+
+    const utterance = new SpeechSynthesisUtterance(sampleText);
+    utterance.pitch = pitchVal;
+    utterance.rate = 0.98;
+
+    const voices = window.speechSynthesis.getVoices();
+    const bestVoice = getBestVoice(genderPreset, voices);
+    if (bestVoice) utterance.voice = bestVoice;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
   async function loadUserPreferences() {
     if (!currentUser || !supabaseClient) return;
     const { data } = await supabaseClient.from('user_preferences').select('*').eq('user_id', currentUser.id).single();
@@ -276,7 +350,10 @@
 
   async function savePreferences() {
     selectedVoiceGender = document.getElementById('pref-voice').value;
+    customPitchValue = parseFloat(document.getElementById('pitch-slider').value);
+
     localStorage.setItem('bb_voice', selectedVoiceGender);
+    localStorage.setItem('bb_pitch', customPitchValue);
 
     if (currentUser && supabaseClient) {
       const preferred_name = document.getElementById('pref-name').value;
@@ -289,7 +366,7 @@
       });
     }
 
-    alert('Preferences saved!');
+    alert('Preferences and Voice Range saved!');
     closeModal('prefs-modal');
   }
 
@@ -306,18 +383,12 @@
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     const voices = window.speechSynthesis.getVoices();
 
-    if (selectedVoiceGender === 'girl') {
-      utterance.pitch = 1.35;
-      utterance.rate = 1.02;
-      const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira'));
-      if (femaleVoice) utterance.voice = femaleVoice;
-    } else {
-      // BOY VOICE TUNING (Lower Pitch: 0.82)
-      utterance.pitch = 0.82;
-      utterance.rate = 0.95;
-      const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('David') || v.name.includes('Oliver'));
-      if (maleVoice) utterance.voice = maleVoice;
-    }
+    // Apply pitch range and natural voice targeting
+    utterance.pitch = customPitchValue;
+    utterance.rate = 0.98;
+
+    const targetVoice = getBestVoice(selectedVoiceGender, voices);
+    if (targetVoice) utterance.voice = targetVoice;
 
     btn.textContent = '🔊 Reading...';
     utterance.onend = () => { btn.textContent = '🔊 Read Aloud'; };
