@@ -76,9 +76,9 @@
     .chat-bubble.assistant { align-self: flex-start; background: rgba(255,255,255,0.04); border: 1px solid rgba(200,160,255,0.15); color: #ede0ff; border-bottom-left-radius: 4px; font-family: 'Playfair Display', serif; }
     .theme-yuan .chat-bubble.assistant { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: #c8dcff; border-color: rgba(80,140,255,0.2); }
 
-    .bubble-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
-    .speech-btn { background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; font-size: 0.75rem; transition: color 0.2s; }
-    .speech-btn:hover { color: rgba(200,180,240,0.9); }
+    .bubble-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
+    .speech-btn, .copy-btn { background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; font-size: 0.75rem; transition: color 0.2s; }
+    .speech-btn:hover, .copy-btn:hover { color: rgba(200,180,240,0.9); }
 
     .input-wrapper { max-width: 760px; width: 100%; margin: 0 auto; padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
     .input-box { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.2); border-radius: 24px; padding: 0.5rem 0.75rem 0.5rem 1.25rem; align-items: flex-end; }
@@ -162,6 +162,7 @@
       <div class="chat-bubble assistant">
         Hello! I'm BeautyBott by Yashal. How are you feeling today? Share whatever is on your mind, or ask for something beautiful.
         <div class="bubble-actions">
+          <button class="copy-btn" onclick="copyBubbleText(this)">📋 Copy</button>
           <button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>
         </div>
       </div>
@@ -245,7 +246,7 @@
   </div>
 </div>
 
-<!-- RESTORED CREDITS MODAL -->
+<!-- CREDITS MODAL -->
 <div class="modal-overlay" id="credits-modal">
   <div class="modal-box" style="max-width: 440px;">
     <div class="modal-title" style="margin-bottom: 0.25rem;">BeautyBot by Yashal</div>
@@ -351,6 +352,21 @@
       else alert('Check email to confirm!');
     }
     closeModal('auth-modal');
+  }
+
+  function copyBubbleText(btn) {
+    const parentBubble = btn.closest('.chat-bubble');
+    const clone = parentBubble.cloneNode(true);
+    const actions = clone.querySelector('.bubble-actions');
+    if (actions) actions.remove();
+    const textToCopy = clone.textContent.trim();
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    }).catch(() => {
+      btn.textContent = '✕ Failed';
+    });
   }
 
   function updatePitchDisplay(val) {
@@ -584,7 +600,10 @@
     document.getElementById('chat-stream').innerHTML = `
       <div class="chat-bubble assistant">
         Started a new conversation! What would you like to discuss?
-        <div class="bubble-actions"><button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button></div>
+        <div class="bubble-actions">
+          <button class="copy-btn" onclick="copyBubbleText(this)">📋 Copy</button>
+          <button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>
+        </div>
       </div>
     `;
     if (currentUser) loadUserConversations();
@@ -621,7 +640,10 @@
     if (sender === 'assistant') {
       const actions = document.createElement('div');
       actions.className = 'bubble-actions';
-      actions.innerHTML = `<button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>`;
+      actions.innerHTML = `
+        <button class="copy-btn" onclick="copyBubbleText(this)">📋 Copy</button>
+        <button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>
+      `;
       bubble.appendChild(actions);
     }
 
