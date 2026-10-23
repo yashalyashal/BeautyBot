@@ -35,17 +35,8 @@
       background: radial-gradient(ellipse at 20% 20%, rgba(30,80,200,0.18) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(20,50,160,0.14) 0%, transparent 55%);
     }
 
-    .petal { position: fixed; pointer-events: none; z-index: 0; animation: fall linear infinite; opacity: 0; }
-    @keyframes fall {
-      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
-      5% { opacity: 0.5; } 95% { opacity: 0.2; }
-      100% { transform: translateY(105vh) rotate(400deg); opacity: 0; }
-    }
-
-    /* LAYOUT: SIDEBAR + MAIN CHAT */
     .app-container { display: flex; min-height: 100vh; position: relative; z-index: 1; }
     
-    /* SIDEBAR DRAWER */
     .sidebar {
       width: 280px; background: rgba(10, 7, 16, 0.85); border-right: 1px solid rgba(200,160,255,0.12);
       backdrop-filter: blur(10px); display: flex; flex-direction: column; transition: transform 0.3s ease;
@@ -68,18 +59,15 @@
     .delete-convo-btn { opacity: 0; background: transparent; border: none; color: rgba(255,100,100,0.7); cursor: pointer; font-size: 0.8rem; }
     .convo-item:hover .delete-convo-btn { opacity: 1; }
 
-    /* MAIN VIEW */
     .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; margin-left: 0; transition: margin-left 0.3s ease; }
     .main-content.sidebar-open { margin-left: 280px; }
 
-    /* TOP NAV BAR */
     .top-nav { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200,160,255,0.08); background: rgba(13,10,18,0.6); backdrop-filter: blur(8px); }
     .toggle-sidebar-btn { background: transparent; border: 1px solid rgba(200,160,255,0.25); color: #e3d2ff; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
     .top-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     .nav-btn { background: transparent; border: 1px solid rgba(200,160,255,0.25); color: rgba(200,180,240,0.9); padding: 0.4rem 0.85rem; border-radius: 20px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
     .nav-btn:hover { background: rgba(200,160,255,0.15); }
 
-    /* CHAT STREAM CONTAINER */
     .chat-stream { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-width: 760px; width: 100%; margin: 0 auto; }
     
     .chat-bubble { max-width: 85%; padding: 1rem 1.25rem; border-radius: 18px; line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap; position: relative; }
@@ -91,7 +79,6 @@
     .speech-btn { background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; font-size: 0.75rem; transition: color 0.2s; }
     .speech-btn:hover { color: rgba(200,180,240,0.9); }
 
-    /* BOTTOM INPUT AREA */
     .input-wrapper { max-width: 760px; width: 100%; margin: 0 auto; padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
     .input-box { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.2); border-radius: 24px; padding: 0.5rem 0.75rem 0.5rem 1.25rem; align-items: flex-end; }
     textarea { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; resize: none; max-height: 120px; line-height: 1.5; padding: 0.4rem 0; }
@@ -99,11 +86,9 @@
     .send-btn { background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
     .attach-btn { background: transparent; border: none; color: rgba(200,180,240,0.6); cursor: pointer; padding: 0.4rem; font-size: 1.1rem; }
 
-    /* PREVIEW THUMBNAIL */
     .preview-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: rgba(200,180,240,0.7); display: none; }
     .preview-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
 
-    /* MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
     .modal-box { background: #151020; border: 1px solid rgba(200,160,255,0.25); padding: 2rem; border-radius: 24px; width: 90%; max-width: 440px; color: #f0eaf8; }
     .modal-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 1rem; text-align: center; color: #e3d2ff; }
@@ -120,7 +105,6 @@
 <body class="theme-guest">
 
 <div class="app-container">
-  <!-- SIDEBAR DRAWER -->
   <div class="sidebar closed" id="sidebar">
     <div class="sidebar-header">
       <span style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #e3d2ff;">Chat History</span>
@@ -129,12 +113,9 @@
     <div style="padding: 0 0.75rem;">
       <button class="new-chat-btn" onclick="createNewChat()">+ New Conversation</button>
     </div>
-    <div class="convos-list" id="convos-list">
-      <!-- Conversation threads rendered dynamically -->
-    </div>
+    <div class="convos-list" id="convos-list"></div>
   </div>
 
-  <!-- MAIN CHAT INTERFACE -->
   <div class="main-content" id="main-content">
     <div class="top-nav">
       <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -177,6 +158,28 @@
   </div>
 </div>
 
+<!-- PREFERENCES MODAL -->
+<div class="modal-overlay" id="prefs-modal">
+  <div class="modal-box">
+    <div class="modal-title">Account Preferences</div>
+    
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Preferred Name</label>
+    <input type="text" id="pref-name" class="modal-input" placeholder="How should BeautyBott call you?" />
+
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Voice Reader Persona</label>
+    <select id="pref-voice" class="modal-input" style="background:#201830; color:#fff;">
+      <option value="boy">Boy Tone (Tuned Yashal Range ~138.5 Hz)</option>
+      <option value="girl">Girl Tone</option>
+    </select>
+
+    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Custom Instructions</label>
+    <textarea id="pref-instructions" class="modal-input" rows="3" placeholder="Any specific tone or reminders for your AI?"></textarea>
+
+    <button class="modal-submit" onclick="savePreferences()">Save Preferences</button>
+    <button class="modal-close" onclick="closeModal('prefs-modal')">Close</button>
+  </div>
+</div>
+
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal-box">
@@ -188,48 +191,11 @@
   </div>
 </div>
 
-<!-- PREFERENCES MODAL -->
-<div class="modal-overlay" id="prefs-modal">
-  <div class="modal-box">
-    <div class="modal-title">Account Preferences</div>
-    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Preferred Name</label>
-    <input type="text" id="pref-name" class="modal-input" placeholder="How should BeautyBott call you?" />
-
-    <label style="font-size:0.8rem; color:rgba(200,180,240,0.6); margin-bottom:0.3rem; display:block;">Custom Instructions</label>
-    <textarea id="pref-instructions" class="modal-input" rows="3" placeholder="Any specific tone or reminders for your AI?"></textarea>
-
-    <button class="modal-submit" onclick="savePreferences()">Save Preferences</button>
-    <button class="modal-close" onclick="closeModal('prefs-modal')">Close</button>
-  </div>
-</div>
-
 <!-- CREDITS MODAL -->
 <div class="modal-overlay" id="credits-modal">
   <div class="modal-box" style="max-width: 440px; text-align: left;">
     <div class="modal-title">BeautyBott by Yashal</div>
     <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.25rem;">Built with care, dedication, and late nights.</div>
-    <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
-      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
-        <span style="color:rgba(200,180,240,0.5);">Created & Developed By</span>
-        <span style="color:#e3d2ff;">Yashal</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
-        <span style="color:rgba(200,180,240,0.5);">Design & Architecture</span>
-        <span style="color:#e3d2ff;">Yashal</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
-        <span style="color:rgba(200,180,240,0.5);">Special Thanks</span>
-        <span style="color:#e3d2ff;">My parents</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(200,160,255,0.1); padding-bottom:0.4rem;">
-        <span style="color:rgba(200,180,240,0.5);">Honourable Mentions</span>
-        <span style="color:#e3d2ff;">Shail, Yuan</span>
-      </div>
-      <div style="display:flex; justify-content:space-between;">
-        <span style="color:rgba(200,180,240,0.5);">Powered By</span>
-        <span style="color:#e3d2ff;">OpenRouter & Supabase</span>
-      </div>
-    </div>
     <button class="modal-close" onclick="closeModal('credits-modal')">Close</button>
   </div>
 </div>
@@ -239,6 +205,7 @@
   let currentTheme = 'guest';
   let currentImageB64 = null;
   let currentImageType = null;
+  let selectedVoiceGender = localStorage.getItem('bb_voice') || 'boy';
 
   const SUPABASE_URL = "https://ckvxjttqawomkuzaqqbc.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdnhqdHRxYXdvbWt1emFxcWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzM5NzYsImV4cCI6MjEwNzc0OTk3Nn0.hEXS_gfG4KzvrHN7Mb5_r20JsOOOZ9w00PkJSlRGyD8";
@@ -260,8 +227,10 @@
     });
   }
 
-  const GUEST_PROMPT = `You are BeautyBott by Yashal — you talk to people like a close friend who genuinely sees them and thinks they're wonderful. Warm, direct, casual, and human.`;
-  const YUAN_PROMPT = `You are BeautyBott by Yashal — you talk like a boy deeply in love with his boyfriend. Warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
+  document.getElementById('pref-voice').value = selectedVoiceGender;
+
+  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human.`;
+  const YUAN_PROMPT = `You are BeautyBott by Yashal — warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
 
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('closed');
@@ -287,12 +256,11 @@
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if (!email || !password) return alert('Enter email and password');
-
     const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
       const { error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
       if (signUpErr) alert(signUpErr.message);
-      else alert('Check your email to confirm registration!');
+      else alert('Check email to confirm!');
     }
     closeModal('auth-modal');
   }
@@ -307,19 +275,55 @@
   }
 
   async function savePreferences() {
-    if (!currentUser || !supabaseClient) return alert('Please sign in first.');
-    const preferred_name = document.getElementById('pref-name').value;
-    const custom_instructions = document.getElementById('pref-instructions').value;
+    selectedVoiceGender = document.getElementById('pref-voice').value;
+    localStorage.setItem('bb_voice', selectedVoiceGender);
 
-    await supabaseClient.from('user_preferences').upsert({
-      user_id: currentUser.id,
-      preferred_name,
-      custom_instructions,
-      updated_at: new Date().toISOString()
-    });
+    if (currentUser && supabaseClient) {
+      const preferred_name = document.getElementById('pref-name').value;
+      const custom_instructions = document.getElementById('pref-instructions').value;
+      await supabaseClient.from('user_preferences').upsert({
+        user_id: currentUser.id,
+        preferred_name,
+        custom_instructions,
+        updated_at: new Date().toISOString()
+      });
+    }
 
     alert('Preferences saved!');
     closeModal('prefs-modal');
+  }
+
+  function speakText(btn) {
+    if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported in this browser.');
+    window.speechSynthesis.cancel();
+
+    const parentBubble = btn.closest('.chat-bubble');
+    const clone = parentBubble.cloneNode(true);
+    const actions = clone.querySelector('.bubble-actions');
+    if (actions) actions.remove();
+    const textToSpeak = clone.textContent.trim();
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const voices = window.speechSynthesis.getVoices();
+
+    if (selectedVoiceGender === 'girl') {
+      utterance.pitch = 1.35;
+      utterance.rate = 1.02;
+      const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira'));
+      if (femaleVoice) utterance.voice = femaleVoice;
+    } else {
+      // BOY VOICE TUNING (Mapped to ~138.5 Hz)
+      utterance.pitch = 0.88;
+      utterance.rate = 1.0;
+      const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('David') || v.name.includes('Oliver'));
+      if (maleVoice) utterance.voice = maleVoice;
+    }
+
+    btn.textContent = '🔊 Reading...';
+    utterance.onend = () => { btn.textContent = '🔊 Read Aloud'; };
+    utterance.onerror = () => { btn.textContent = '🔊 Read Aloud'; };
+
+    window.speechSynthesis.speak(utterance);
   }
 
   async function loadUserConversations() {
@@ -327,7 +331,6 @@
     const { data } = await supabaseClient.from('conversations').select('*').order('updated_at', { ascending: false });
     const list = document.getElementById('convos-list');
     list.innerHTML = '';
-
     if (data) {
       data.forEach(c => {
         const item = document.createElement('div');
@@ -347,9 +350,7 @@
     document.getElementById('chat-stream').innerHTML = `
       <div class="chat-bubble assistant">
         Started a new conversation! What would you like to discuss?
-        <div class="bubble-actions">
-          <button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button>
-        </div>
+        <div class="bubble-actions"><button class="speech-btn" onclick="speakText(this)">🔊 Read Aloud</button></div>
       </div>
     `;
     if (currentUser) loadUserConversations();
@@ -359,11 +360,9 @@
     activeConversationId = id;
     loadUserConversations();
     const { data } = await supabaseClient.from('messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true });
-    
     const stream = document.getElementById('chat-stream');
     stream.innerHTML = '';
     conversationMessages = [];
-
     if (data) {
       data.forEach(m => {
         conversationMessages.push({ role: m.sender, content: m.content });
@@ -396,30 +395,13 @@
     stream.scrollTop = stream.scrollHeight;
   }
 
-  function speakText(btn) {
-    if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported in this browser.');
-    window.speechSynthesis.cancel();
-
-    const parentBubble = btn.closest('.chat-bubble');
-    const clone = parentBubble.cloneNode(true);
-    const actions = clone.querySelector('.bubble-actions');
-    if (actions) actions.remove();
-
-    const utterance = new SpeechSynthesisUtterance(clone.textContent.trim());
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-  }
-
   function exportChatTranscript() {
-    if (conversationMessages.length === 0) return alert('No active conversation to export.');
-    
+    if (conversationMessages.length === 0) return alert('No conversation to export.');
     let markdownContent = `# BeautyBott Conversation Transcript\n\n`;
     conversationMessages.forEach(m => {
       const roleName = m.role === 'user' ? 'You' : 'BeautyBott';
       markdownContent += `### **${roleName}**\n${m.content}\n\n---\n\n`;
     });
-
     const blob = new Blob([markdownContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -439,23 +421,19 @@
   async function sendMessage() {
     const input = document.getElementById('user-input');
     const text = input.value.trim();
-
     if (currentTheme === 'guest' && text === YUAN_PW) {
       setupYuanMode();
       input.value = '';
       return;
     }
-
     if (!text && !currentImageB64) return;
 
     input.value = '';
     appendBubble('user', text || '[Photo attached]');
     conversationMessages.push({ role: 'user', content: text });
 
-    // Handle Supabase thread persistence
     if (currentUser && supabaseClient) {
       if (!activeConversationId) {
-        // Auto-generate title using Gemini
         let smartTitle = 'New Conversation';
         try {
           const titleRes = await fetch('/api/chat', {
@@ -467,20 +445,15 @@
           if (titleData.title) smartTitle = titleData.title;
         } catch(e) {}
 
-        const { data } = await supabaseClient.from('conversations').insert([
-          { user_id: currentUser.id, title: smartTitle }
-        ]).select().single();
+        const { data } = await supabaseClient.from('conversations').insert([{ user_id: currentUser.id, title: smartTitle }]).select().single();
         if (data) activeConversationId = data.id;
       }
 
       if (activeConversationId) {
-        await supabaseClient.from('messages').insert([
-          { conversation_id: activeConversationId, sender: 'user', content: text }
-        ]);
+        await supabaseClient.from('messages').insert([{ conversation_id: activeConversationId, sender: 'user', content: text }]);
       }
     }
 
-    // Call Chat API
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -500,12 +473,9 @@
       conversationMessages.push({ role: 'assistant', content: reply });
 
       if (currentUser && supabaseClient && activeConversationId) {
-        await supabaseClient.from('messages').insert([
-          { conversation_id: activeConversationId, sender: 'assistant', content: reply }
-        ]);
+        await supabaseClient.from('messages').insert([{ conversation_id: activeConversationId, sender: 'assistant', content: reply }]);
         loadUserConversations();
       }
-
       removeImage();
     } catch (err) {
       appendBubble('assistant', 'Sorry, I hit a snag connecting. Please try again!');
@@ -524,7 +494,6 @@
           systemPrompt: currentTheme === 'yuan' ? YUAN_PROMPT : GUEST_PROMPT
         })
       });
-
       const data = await res.json();
       appendBubble('assistant', data.content);
     } catch (e) {
