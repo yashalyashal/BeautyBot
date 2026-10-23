@@ -87,15 +87,15 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openRouterKey}`,
-        'HTTP-Referer': 'https://beautybotbyyashal.vercel.app',
-        'X-Title': 'BeautyBot by Yashal',
+        'HTTP-Referer': 'https://beautybott.vercel.app',
+        'X-Title': 'BeautyBott by Yashal',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         max_tokens: 1000,
         messages: [
-          { role: 'system', content: 'You are BeautyBot by Yashal, a deeply empathetic, uplifting, and warm personal assistant.' },
+          { role: 'system', content: 'You are BeautyBott by Yashal, a deeply empathetic, uplifting, and warm personal assistant.' },
           { role: 'user', content: userContentPayload }
         ]
       })
