@@ -97,7 +97,7 @@
     .modal-submit { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #7b3fe4, #4a7de8); border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
     .modal-close { margin-top: 0.75rem; background: transparent; border: none; color: rgba(200,180,240,0.5); cursor: pointer; text-decoration: underline; font-size: 0.8rem; width: 100%; text-align: center; }
 
-    /* CALL UI STYLING */
+    /* CALL OVERLAY STYLING */
     .call-overlay { position: fixed; inset: 0; background: #08050e; display: none; flex-direction: column; justify-content: space-between; align-items: center; z-index: 200; padding: 3rem 1.5rem; }
     .call-avatar { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #8c50f0, #4a7de8); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; box-shadow: 0 0 40px rgba(140,80,240,0.4); animation: pulse 2s infinite ease-in-out; }
     @keyframes pulse { 0% { transform: scale(0.98); box-shadow: 0 0 20px rgba(140,80,240,0.3); } 50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(140,80,240,0.6); } 100% { transform: scale(0.98); box-shadow: 0 0 20px rgba(140,80,240,0.3); } }
@@ -107,12 +107,19 @@
     .call-live-text { max-width: 500px; width: 100%; text-align: center; font-size: 1.1rem; color: #ede0ff; min-height: 80px; padding: 1rem; line-height: 1.5; font-family: 'Playfair Display', serif; }
     .end-call-btn { background: #dc3545; color: white; border: none; width: 68px; height: 68px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(220,53,69,0.5); }
 
+    /* CUSTOM PITCH RANGE CONTROLS */
     .pitch-controls-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(200,160,255,0.15); padding: 1rem; border-radius: 16px; margin-bottom: 1rem; }
     .pitch-slider-wrapper { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
     .pitch-slider { flex: 1; accent-color: #8c50f0; cursor: pointer; }
     .pitch-val-tag { font-size: 0.85rem; color: #e3d2ff; font-weight: bold; width: 45px; text-align: right; }
     .preview-btn { background: rgba(140,80,240,0.2); border: 1px solid rgba(180,130,255,0.3); color: #e3d2ff; padding: 0.4rem 0.8rem; border-radius: 10px; cursor: pointer; font-size: 0.8rem; margin-top: 0.6rem; width: 100%; transition: all 0.2s; }
     .preview-btn:hover { background: rgba(140,80,240,0.4); }
+
+    /* CREDITS STYLING */
+    .credits-list { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; }
+    .credit-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200,160,255,0.08); padding-bottom: 0.6rem; font-size: 0.88rem; }
+    .credit-label { color: rgba(200,180,240,0.5); }
+    .credit-val { color: #f0eaf8; font-weight: 500; text-align: right; }
 
     @media (max-width: 768px) {
       .sidebar { width: 240px; }
@@ -177,7 +184,7 @@
   </div>
 </div>
 
-<!-- FULLSCREEN CALL UI -->
+<!-- FULLSCREEN CALL OVERLAY -->
 <div class="call-overlay" id="call-overlay">
   <div class="call-status">
     <div class="call-status-title" id="call-partner-name">BeautyBott</div>
@@ -227,7 +234,7 @@
   </div>
 </div>
 
-<!-- AUTH & CREDITS MODALS -->
+<!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal-box">
     <div class="modal-title">BeautyBott Account</div>
@@ -238,10 +245,35 @@
   </div>
 </div>
 
+<!-- RESTORED CREDITS MODAL -->
 <div class="modal-overlay" id="credits-modal">
-  <div class="modal-box" style="max-width: 440px; text-align: left;">
-    <div class="modal-title">BeautyBott by Yashal</div>
-    <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.25rem;">Built with care, dedication, and late nights.</div>
+  <div class="modal-box" style="max-width: 440px;">
+    <div class="modal-title" style="margin-bottom: 0.25rem;">BeautyBot by Yashal</div>
+    <div style="font-size: 0.85rem; color: rgba(200,180,240,0.6); text-align: center; margin-bottom: 1.5rem;">Built with care, dedication, and late nights.</div>
+    
+    <div class="credits-list">
+      <div class="credit-row">
+        <span class="credit-label">Created & Developed By</span>
+        <span class="credit-val">Yashal</span>
+      </div>
+      <div class="credit-row">
+        <span class="credit-label">Design & Architecture</span>
+        <span class="credit-val">Yashal</span>
+      </div>
+      <div class="credit-row">
+        <span class="credit-label">Special Thanks</span>
+        <span class="credit-val">My parents, for the constant support</span>
+      </div>
+      <div class="credit-row">
+        <span class="credit-label">Honourable Mentions</span>
+        <span class="credit-val">Shail, Yuan</span>
+      </div>
+      <div class="credit-row" style="border-bottom: none;">
+        <span class="credit-label">Powered By</span>
+        <span class="credit-val">OpenRouter & Supabase</span>
+      </div>
+    </div>
+
     <button class="modal-close" onclick="closeModal('credits-modal')">Close</button>
   </div>
 </div>
@@ -285,7 +317,7 @@
   document.getElementById('pitch-slider').value = customPitchValue;
   document.getElementById('pitch-val-display').textContent = parseFloat(customPitchValue).toFixed(2);
 
-  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human. Keep answers concise for call mode.`;
+  const GUEST_PROMPT = `You are BeautyBott by Yashal — warm, direct, casual, and human. Keep responses concise during voice call mode.`;
   const YUAN_PROMPT = `You are BeautyBott by Yashal — warm, direct, tender. Always end with:\n"Eitherway,\nJust know,\nNo matter how you look at the moment,\nYou always completely drive me wild."`;
 
   function toggleSidebar() {
@@ -386,7 +418,6 @@
       appendBubble('user', spokenText);
       conversationMessages.push({ role: 'user', content: spokenText });
 
-      // Send spoken query to AI
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
@@ -405,7 +436,6 @@
         appendBubble('assistant', reply);
         conversationMessages.push({ role: 'assistant', content: reply });
 
-        // Speak back
         speakCallResponse(reply, () => {
           if (isCallActive) initSpeechRecognition();
         });
@@ -454,7 +484,6 @@
     }
   }
 
-  // REST OF ENGINE (Chat, Export, Preferences)
   function previewVoiceSetting() {
     if (!('speechSynthesis' in window)) return alert('Speech Synthesis not supported.');
     window.speechSynthesis.cancel();
